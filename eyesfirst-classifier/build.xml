@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+
+<!--
+Copyright 2012 The MITRE Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!-- There's no good way to invoke the MATLAB compiler directly from within
+Maven, so instead, this little ANT script deals with that on its own. -->
+<project name="Image Classifier MATLAB Compiler" default="compile">
+	<property environment="env"/>
+	<property name="matlab.src.dir" value="src/main/matlab"/>
+	<property name="matlab.dest.dir" value="target${file.separator}org.mitre.eyesfirst.retinalthickness.classifier${file.separator}src"/>
+	<property name="project.build.directory" value="target"/>
+	<property name="training.data" value="${matlab.src.dir}/trainingStatsHighQuality.mat"/>
+	<property name="performance.data" value="${matlab.src.dir}/thicknessPerformanceSplines.mat"/>
+	<property name="he.stats.data" value="${matlab.src.dir}/trainingStats_ppl_2.mat"/>
+	<property name="he.splines.data" value="${matlab.src.dir}/HESplineFile.mat"/>
+	<property name="normal.percent.data" value="${matlab.src.dir}/normalTrainingPercentilesstatInd_1.mat"/>
+
+	<import file="find-matlab.xml"/>
+
+	<target name="-init-base" depends="locate-mcr">
+		<condition property="os.uses.bat" value="yes">
+			<os family="windows"/>
+		</condition>
+	</target>
+
+	<target name="-init-mcc-unix" depends="-init-base" unless="os.uses.bat">
+		<echo>Using UNIX calling style</echo>
+		<property name="matlab.mcc" location="${matlab}/bin/mcc"/>
+		<!-- Under UNIX we can just call the damned thing directly. -->
+		<macrodef name="mcc">
+			<attribute name="dir"/>
+			<attribute name="wrapper"/>
+			<element name="arguments" implicit="yes"/>
+			<sequential>
+				<exec executable="${matlab.mcc}" dir="@{dir}" failonerror="true">
+					<arg value="-W"/>
+					<arg value="@{wrapper}"/>
+					<arguments/>
+				</exec>
+			</sequential>
+		</macrodef>
+		<available property="matlab.mcc.available" file="${matlab.mcc}"/>
+	</target>
+
+	<target name="-init-mcc-windows" depends="-init-base" if="os.uses.bat">
+		<echo>Using Windows calling style</echo>
+		<!-- Under Windows, we need to use ComSpec/COMSPEC -->
+		<property name="matlab.mcc" location="${matlab}\bin\mcc.bat"/>
+		<condition property="com.spec" value="${env.ComSpec}">
+			<isset property="env.ComSpec"/>
+		</condition>
+		<condition property="com.spec" value="${env.COMSPEC}">
+			<isset property="env.COMSPEC"/>
+		</condition>
+		<fail unless="com.spec">Unable to locate your command interpreter. Ensure that the environment variable ComSpec is set.</fail>
+		<macrodef name="mcc">
+			<attribute name="dir"/>
+			<attribute name="wrapper"/>
+			<element name="arguments" implicit="yes"/>
+			<sequential>
+				<exec executable="${com.spec}" dir="@{dir}" failonerror="true">
+					<arg value="/c"/>
+					<arg value="${matlab.mcc}"/>
+					<arg value="-W"/>
+					<arg value='"@{wrapper}"'/>
+					<arguments/>
+				</exec>
+			</sequential>
+		</macrodef>
+		<available property="matlab.mcc.available" file="${matlab.mcc}"/>
+		<available property="matlab.mcc.available" file="${matlab.mcc}.bat"/>
+	</target>
+
+	<target name="-init-mcc" depends="-init-mcc-unix,-init-mcc-windows" unless="matlab.mcc.available">
+		<echo>The MATLAB compiler was not located at: ${matlab.mcc}
+If MATLAB is on the path, this might work anyway.
+Otherwise, please add your MATLAB bin directory to the path.</echo>
+	</target>
+
+	<target name="-init" depends="-init-mcc"/>
+
+	<target name="-check-needed">
+		<!-- See if there's anything to do. -->
+		<uptodate property=".matlab.uptodate" targetfile="${matlab.dest.dir}/classifier.jar">
+			<srcfiles dir="src/main/matlab" includes="**/*.m"/>
+		</uptodate>
+	</target>
+
+	<target name="compile" depends="-init,-check-needed" unless=".matlab.uptodate" description="Compiles the Matlab code">
+		<!-- Due to previous weirdness related to non-clean builds, just delete
+		whatever exists and start from scratch. I'm pretty sure MathWork's tools
+		do this too. -->
+		<delete dir="${matlab.dest.dir}"/>
+		<mkdir dir="${matlab.dest.dir}"/>
+		<property name="matlab.call_thickness_classifier.m" location="${matlab.src.dir}/call_thickness_classifier.m"/>
+		<mcc dir="${matlab.src.dir}" wrapper="java:org.mitre.eyesfirst.retinalthickness.classifier,RetinalThickessClassifier">
+			<arg value="-T"/>
+			<arg value="link:lib"/>
+			<arg value="-d"/>
+			<arg file="${matlab.dest.dir}"/>
+			<arg value="-w"/>
+			<arg value="enable:specified_file_mismatch"/>
+			<arg value="-w"/>
+			<arg value="enable:repeated_file"/>
+			<arg value="-w"/>
+			<arg value="enable:switch_ignored"/>
+			<arg value="-w"/>
+			<arg value="enable:missing_lib_sentinel"/>
+			<arg value="-w"/>
+			<arg value="enable:demo_license"/>
+			<arg value="-v"/>
+			<arg value="class{RetinalThickessClassifier:${matlab.call_thickness_classifier.m}}"/>
+			<arg value="-a"/>
+			<arg file="${training.data}"/>
+			<arg value="-a"/>
+			<arg file="${performance.data}"/>
+			<arg value="-a"/>
+			<arg file="${he.stats.data}"/>
+			<arg value="-a"/>
+			<arg file="${he.splines.data}"/>
+			<arg value="-a"/>
+			<arg file="${normal.percent.data}"/>
+		</mcc>
+		<mkdir dir="${project.build.directory}/classes"/>
+		<copy todir="${project.build.directory}/classes">
+			<fileset dir="${matlab.dest.dir}/classes"/>
+		</copy>
+	</target>
+</project>

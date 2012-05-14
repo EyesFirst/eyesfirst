@@ -1,0 +1,86 @@
+================================================================================
+                  EYESFIRST DORI WEB INSTALLATION INSTRUCTIONS
+================================================================================
+
+DORI Web is split into two projects: the DORI Browser Grails web application,
+and the DICOM Uploader Applet, which is used to anonymize DICOM files prior to
+them being uploaded to the DORI server.
+
+The DORI Web software is in the "dori-web" directory and is a Grails 1.3
+project. The DICOM Uploader Applet is in the "dicom-uploader-applet" directory
+and is a Maven 2.x project.
+
+-----------------
+REQUIRED SOFTWARE
+-----------------
+
+Before you can run DORI Web, you will need to install the following required
+software:
+
+-------
+MySQL 5
+-------
+
+<http://www.mysql.com/>
+
+If you are using Linux, your OS almost certainly will provide MySQL 5 packages.
+Exactly how to install them varies by OS, but generally speaking:
+
+RedHat:
+
+    sudo yum install mysql5-server
+
+Debian (Ubuntu, Mint, etc.):
+
+    sudo apt-get install mysql-server-5.5
+
+For all other OSes, go to the MySQL downloads page
+<http://www.mysql.com/downloads/> and download the appropriate installer from
+there.
+
+------------------------
+Java Runtime Environment
+------------------------
+
+If you are compiling the code, you will require the Java Development Kit (JDK).
+It is available from Oracle:
+<http://www.oracle.com/technetwork/java/javase/downloads/index.html>
+
+You should use Java SE 6u31 or later or Java SE 7u3 or later.
+
+If you are using Linux, your distribution most likely provides a version of the
+OpenJDK. While the OpenJDK is not the Oracle JDK, it should work with DORI Web
+(although this has not been exstensively tested).
+
+--------
+DCM4CHEE
+--------
+
+<http://www.dcm4che.org/>
+
+DORI Web acts as a front end to DCM4CHEE and does not store DICOM images on its
+own.
+
+Follow the installation instructions for DCM4CHEE:
+<http://www.dcm4che.org/confluence/display/ee2/Installation>
+
+------------
+Grails 1.3.7
+------------
+
+<http://grails.org/>
+
+DORI Web is currently built against Grails 1.3.7 and has not been tested with
+the newer versions.
+
+Download it from <http://grails.org/Download> and follow the installation
+instructions.
+
+----
+SOLR
+----
+
+<http://lucene.apache.org/solr/>
+
+The Solr configuration is in the "solr" directory. Essentially you should be
+able to point your Solr home to be the "solr/solr" directory and it should work.

@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+
+<!--
+Copyright 2012 The MITRE Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<project name="MCR Artifact Installer" default="install" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+	<property name="mcr.version.expected" value="7.16"/>
+	<property environment="env"/>
+
+	<include file="find-matlab.xml"/>
+
+	<path id="maven-ant-tasks.classpath" path="lib/maven-ant-tasks-2.1.3.jar" />
+	<typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+	         uri="antlib:org.apache.maven.artifact.ant"
+	         classpathref="maven-ant-tasks.classpath" />
+
+	<target name="install" depends="-install,-check-version-mistmatch" description="Install the current MCR artifact if possible.">
+	</target>
+
+	<target name="-install" depends="matlab.locate-mcr">
+		<echo>Pulling MCR JAR from ${matlab}</echo>
+		<available property="matlab.compiler"
+		           value="${matlab}/toolbox/compiler/mcrversion.ver"
+		           file="${matlab}/toolbox/compiler/mcrversion.ver"
+		           type="file"/>
+		<fail unless="matlab.compiler">Unable to locate the MCR compiler. Do you have the Compiler toolkit installed?</fail>
+		<available property="javabuilder.jar"
+		           value="${matlab}/toolbox/javabuilder/jar/javabuilder.jar"
+		           file="${matlab}/toolbox/javabuilder/jar/javabuilder.jar"
+		           type="file"/>
+		<fail unless="javabuilder.jar">Unable to locate javabuilder.jar. Do you have the Java Builder toolkit installed?</fail>
+		<loadfile property="mcr.version" srcFile="${matlab}/toolbox/compiler/mcrversion.ver">
+			<filterchain>
+				<striplinebreaks/>
+			</filterchain>
+		</loadfile>
+		<echo>Attempting to install JavaBuilder JAR for MCR version ${mcr.version}...</echo>
+		<!-- OK, we have everything we need, now install it. -->
+		<artifact:pom id="javabuilder.pom" groupId="com.mathworks" artifactId="javabuilder"
+			version="${mcr.version}">
+		</artifact:pom>
+		<!-- Due to an unresolved bug (http://jira.codehaus.org/browse/MANTTASKS-170),
+		we need to write out the POM and read it back in. -->
+		<artifact:writepom pomRefId="javabuilder.pom" file="${basedir}/javabuilder-pom.xml"/>
+		<artifact:pom id="disk-based.pom" file="${basedir}/javabuilder-pom.xml" />
+		<artifact:install file="${javabuilder.jar}" pomRefId="disk-based.pom"/>
+		<condition property="mcr.version.mismatch">
+			<not><equals arg1="${mcr.version}" arg2="${mcr.version.expected}" forcestring="true"/></not>
+		</condition>
+	</target>
+
+	<target name="-check-version-mistmatch" depends="-install" if="mcr.version.mismatch">
+		<echo level="warning">MCR Version Mistmatch Detected!
+
+The installed MCR is version ${mcr.version}, but the EyesFirst code was
+written (and tested) against ${mcr.version.expected}. It may work anyway, HOWEVER, you
+WILL be forced to change the version in the pom.xml file.
+
+Change:
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.mathworks&lt;/groupId&gt;
+      &lt;artifactId&gt;javabuilder&lt;/artifactId&gt;
+      &lt;version&gt;${mcr.version.expected}&lt;/version&gt;
+    &lt;/dependency&gt;
+
+To:
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.mathworks&lt;/groupId&gt;
+      &lt;artifactId&gt;javabuilder&lt;/artifactId&gt;
+      &lt;version&gt;${mcr.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+</echo>
+	</target>
+</project>

@@ -1,0 +1,94 @@
+/*
+ * Copyright 2012 The MITRE Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * CSS styles for the uploader
+ */
+ 
+html {
+	font-family: "Myriad Pro", Calibri, Helvetica, Arial;
+	font-size: 10pt;
+	background-color: #FFF;
+	color: #000;
+}
+
+table th, table td { font-size: 10pt; }
+
+.uploader-status {
+	display: table;
+	width: 100%;
+	background-color: #DDD;
+	color: #000;
+	margin: 0;
+	padding: 0;
+	border: solid 1px #CCC;
+}
+
+.uploader-status .step {
+	display: table-cell;
+	padding: 0;
+	margin: 0;
+	text-align: center;
+}
+
+.uploader-status .step span {
+	display: block;
+	padding: 4px;
+}
+
+.uploader-status .step.current {
+	background-image: url(../images/status_arrow_head.png);
+	background-position: 100% 50%;
+	background-repeat: no-repeat;
+	background-color: #888;
+	color: #FFF;
+	font-weight: bold;
+}
+
+.uploader-status .step.completed {
+	background-color: #888;
+	color: #CCC;
+}
+
+.existing-patient, .efid-status {
+	margin-left: 1em;
+}
+
+.status-checking, .status-failed, .status-ok {
+	padding-left: 20px;
+	min-height: 16px;
+	background-repeat: no-repeat;
+	background-position: 0 50%;
+}
+.status-checking { background-image: url(../images/spinner.gif); }
+.status-failed   { background-image: url(../images/skin/exclamation.png); }
+.status-ok       { background-image: url(../images/skin/accept.png); }
+
+.page-buttons {
+	margin: 1em;
+	/*text-align: center;*/
+}
+.page-buttons button {
+	margin: 0 0.5em;
+}
+
+.dicom-deid-file {
+	background-image: url(../images/skin/bullet_black.png);
+	background-position: 0 50%;
+	background-repeat: no-repeat;
+	padding-left: 20px;
+	min-height: 16px;
+}
+.dicom-deid-file.verified { background-image: url(../images/skin/accept.png); }

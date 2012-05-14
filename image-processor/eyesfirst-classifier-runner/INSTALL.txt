@@ -1,0 +1,11 @@
+This currently uses the DCM4CHE2 2.0.25 toolkit which, at the time of this
+writing, is not available in any public Maven repository. So you'll have to
+build and install it yourself.
+
+Download it from <www.dcm4che.org/confluence/display/d2/dcm4che2+DICOM+Toolkit>
+and then use Maven to install it. (Basically, unzip it, CD into the created
+directory, and run "mvn install".)
+
+Unfortunately, you are likely to run into a dependency on the Java Advanced
+ImageIO library, which Sun no longer provides for download. (And neither does
+Oracle, now that they're Oracle.)

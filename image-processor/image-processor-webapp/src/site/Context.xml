@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<!--
+Example Tomcat configuration file for overriding configuration.
+
+Copy the contents into the <Context> element within the
+"$CATALINA_BASE/conf/context.xml" file.
+
+You may also copy this file directly into your Tomcat
+"conf/[enginename]/[hostname]" directory using the name of the WAR file. For
+example, using all default names, this would be copied to
+"$CATALINA_BASE/conf/Catalina/localhost/image-processor-webapp.xml".
+
+THIS IS NOT RECOMMENDED, as Tomcat will delete that file if you ever undeploy
+the webapp. Say, to upgrade it with a newer version. I believe that fill will
+also be overwritten with the contents of the "META-INF/Context.xml" file inside
+the WAR, if any.
+
+Instead, just copy the <Environment> elements.
+
+-->
+<Context>
+	<!-- Note that "override" in the following values means "override these
+	values with the ones from the WAR" which is the default, and seems really
+	silly to me. -->
+	<!-- The WADO endpoint URL. The WADO request parameters will be appended to
+	     the end of this (including the '?'). -->
+	<Environment name="eyesfirst/wado.url" override="false"
+	             type="java.lang.String"
+	             value="http://localhost:8888/wado"/>
+	<!-- The maximum number of processes that will be run at once. May be set
+	     to 0 (or any negative number) to allow any number to run at once.-->
+	<Environment name="eyesfirst/processes.max" override="false"
+	             type="java.lang.Integer"
+	             value="1"/>
+	<!-- Path to the directory containing the JAR files required to run the
+	     image processor. All JARs in that path will be used. If not specified,
+	     the /WEB-INF/processor-lib directory will be used, assuming it can be
+	     discovered. -->
+	<Environment name="eyesfirst/jar.path" override="false"
+	             type="java.lang.String"
+	             value=""/>
+	<!-- The path to the MATLAB runtime (or a MATLAB installation). -->
+	<Environment name="eyesfirst/mcr.path" override="false"
+	             type="java.lang.String"
+	             value="/opt/MATLAB/R2011b"/>
+	<!-- The URL to send the processed DICOM to. -->
+	<Environment name="eyesfirst/dicom.url" override="false"
+	             type="java.lang.String"
+	             value="DCM4CHEE@localhost"/>
+	<!-- The URL to callback once a run has completed. -->
+	<Environment name="eyesfirst/callback.url" override="false"
+	             type="java.lang.String"
+	             value="http://localhost:8080/doriweb/upload/processed"/>
+	<!-- The location to store temporary files. If left blank, a temporary
+	directory will be created at startup and files will be stored there. -->
+	<Environment name="eyesfirst/output.path" override="false"
+	             type="java.lang.String"
+	             value=""/>
+</Context>

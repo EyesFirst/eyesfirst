@@ -1,0 +1,8 @@
+{
+  "": "COMMENT: THIS FILE IS FOR DEVELOPMENT WITHOUT GRAILS. GRAILS HAS A URL MAPPING DYNAMICALLY MASKING THIS.",
+  
+  "internal":     true,
+  "username":     "UsernameHere",
+  "solrCoreUrl":  "http://localhost:8983/solr/dicomobjects/",
+  "solrCoreRequestHandler": "ajaxsolr"
+}

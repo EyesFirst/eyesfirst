@@ -1,0 +1,25 @@
+<div class="result-title">EF#field('pat_id')X/#field('study_pat_age_years')</div>
+<div>Features: #field('features')</div>
+<div>In Stock: #field('inStock')</div>
+<div class="mlt">
+  #set($mlt = $mltResults.get($docId))
+  #set($mltOn = $params.getBool('mlt'))
+  #if($mltOn == true)<div class="field-name">Similar Items</div>#end
+  #if ($mltOn && $mlt && $mlt.size() > 0)
+  <ul>
+    #foreach($mltHit in $mlt)
+      #set($mltId = $mltHit.getFieldValue('id'))
+      <li><div><a href="#url_for_home?q=id:$mltId">$mltId</a></div><div><span class="field-name">Name:</span> $mltHit.getFieldValue('name')</div>
+        <div><span class="field-name">Price:</span> $!number.currency($mltHit.getFieldValue('price')) <span class="field-name">In Stock:</span> $mltHit.getFieldValue('inStock')</div>
+
+      </li>
+    #end
+  </ul>
+  #elseif($mltOn && $mlt.size() == 0)
+    <div>No Similar Items Found</div>
+  #end
+</div>
+#if($params.getBool("debugQuery",false))
+  <a href="#" onclick='jQuery(this).siblings("pre").toggle(); return false;'>toggle explain</a>
+  <pre style="display:none">$response.getExplainMap().get($doc.getFirstValue('id'))</pre>
+#end

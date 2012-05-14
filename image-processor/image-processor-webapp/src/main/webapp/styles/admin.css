@@ -1,0 +1,48 @@
+/*
+ * Admin page styles.
+ */
+
+html {
+	font-family: "Lucida Grande", Tahoma, "BitStream Vera Sans", Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+}
+
+.process-table {
+	border: solid 1px #999;
+	border-collapse: collapse;
+	width: 100%;
+	font-size: 10pt;
+}
+
+.process-table td, .process-table th {
+	border: solid 1px #CCC;
+	padding: 2pt;
+}
+
+.process-table .process-text {
+	width: 50%;
+}
+
+.process-table .process-status {
+	width: 7em;
+	text-align: center;
+}
+
+.process-status-icon {
+	width: 16px;
+	height: 16px;
+	text-indent: -999999px;
+	background-image: url(icons/icons.png);
+	background-repeat: no-repeat;
+	float: left;
+}
+
+.process-status-running {
+	background-position: -64px 0px;
+}
+.process-status-failed {
+	background-position: -32px 0px;
+}
+.process-status-completed {
+	background-position: -16px 0px;
+}

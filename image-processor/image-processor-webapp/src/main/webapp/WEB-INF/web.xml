@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0"> 
+
+	<env-entry>
+		<description>The WADO endpoint URL. The WADO request parameters will be
+		appended to the end of this (including the '?').</description>
+		<env-entry-name>eyesfirst/wado.url</env-entry-name>
+		<env-entry-type>java.lang.String</env-entry-type>
+		<env-entry-value>http://localhost:8888/wado</env-entry-value>
+	</env-entry>
+	<env-entry>
+		<description>The maximum number of processes that will be run at once.
+		May be set to 0 (or any negative number) to allow any number to run
+		at once.</description>
+		<env-entry-name>eyesfirst/processes.max</env-entry-name>
+		<env-entry-type>java.lang.Integer</env-entry-type>
+		<env-entry-value>1</env-entry-value>
+	</env-entry>
+	<env-entry>
+		<description>Path to the directory containing the JAR files required to
+		run the image processor. All JARs in that path will be used. If not
+		specified, the /WEB-INF/processor-lib directory will be used, assuming
+		it can be discovered.</description>
+		<env-entry-name>eyesfirst/jar.path</env-entry-name>
+		<env-entry-type>java.lang.String</env-entry-type>
+		<env-entry-value></env-entry-value>
+	</env-entry>
+	<env-entry>
+		<description>The path to the MATLAB runtime (or a MATLAB installation).
+		If left blank, the MCRROOT environment variable will be used.</description>
+		<env-entry-name>eyesfirst/mcr.path</env-entry-name>
+		<env-entry-type>java.lang.String</env-entry-type>
+		<env-entry-value>/opt/MATLAB/R2011b</env-entry-value>
+	</env-entry>
+	<env-entry>
+		<description>The URL to send the processed DICOM to. If left blank,
+		nothing will be uploaded.</description>
+		<env-entry-name>eyesfirst/dicom.url</env-entry-name>
+		<env-entry-type>java.lang.String</env-entry-type>
+		<env-entry-value>DCM4CHEE@localhost</env-entry-value>
+	</env-entry>
+	<env-entry>
+		<description>The URL to callback once a run has completed. If left
+		blank, no response will be sent.</description>
+		<env-entry-name>eyesfirst/callback.url</env-entry-name>
+		<env-entry-type>java.lang.String</env-entry-type>
+		<env-entry-value>http://localhost:8080/doriweb/upload/processed</env-entry-value>
+	</env-entry>
+	<env-entry>
+		<description>The location to store temporary files. If left blank, a
+		temporary directory will be created at startup and files will be stored
+		there.</description>
+		<env-entry-name>eyesfirst/output.path</env-entry-name>
+		<env-entry-type>java.lang.String</env-entry-type>
+		<env-entry-value></env-entry-value>
+	</env-entry>
+</web-app>

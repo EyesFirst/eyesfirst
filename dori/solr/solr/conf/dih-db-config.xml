@@ -1,0 +1,48 @@
+<dataConfig>
+    <dataSource name="mysql_readonly" driver="com.mysql.jdbc.Driver" url="jdbc:mysql://localhost:3306/" user="readonly" password="readonly" batchSize="-1" />
+    <!--
+    The anonymization of the patient's age is considered to have been done on the source data already. It's not the responsibility of anything here.
+    -->
+    <document>
+      <entity name="dcm" dataSource= "mysql_readonly" query="
+        select
+        p.pk as pat_pk, pat_id, pat_id_issuer, pat_name, pat_birthdate, pat_sex as pat_gender,
+        study.pk as study_pk, study_iuid, study_id, study_datetime,
+        series.pk as series_pk, series_iuid, series.modality, series_desc,
+        inst.pk as inst_pk, sop_iuid, sop_cuid, inst_no, content_datetime, inst.updated_time as updated_time, inst_custom1 as laterality,
+        efid_issuer.name as efid_issuer_name, efid_id as efid, processed_query_string 
+        from pacsdb.instance as inst inner join pacsdb.series on inst.series_fk = pacsdb.series.pk inner join pacsdb.study on pacsdb.series.study_fk = pacsdb.study.pk inner join pacsdb.patient as p on pacsdb.study.patient_fk = p.pk
+         inner join doriweb.dicom_image as dicom_image on inst.sop_iuid = dicom_image.object_uid
+         inner join doriweb.efid as efid on dicom_image.efid_id = efid.id
+         inner join doriweb.efid_issuer as efid_issuer on efid.issuer_id = efid_issuer.id
+        where
+          '${dataimporter.request.clean}' != 'false' or
+          inst.updated_time > '${dataimporter.last_index_time}' or
+          p.updated_time > '${dataimporter.last_index_time}'
+        order by pat_pk desc, inst_pk desc
+        "
+        transformer="DateFormatTransformer,script:calcStudyPatAge">
+        <field column="pat_birthdate" dateTimeFormat="yyyyMMdd" />
+      </entity>
+      <!--
+        <entity name="item" query="select * from medical_history.profile">
+        </entity>
+        -->
+    </document>
+    <script language="groovy"><![CDATA[
+      import static java.util.Calendar.YEAR
+      Map calcStudyPatAge(Map row,dihCtx) {
+        Date imgDt = row.study_datetime
+        Date patDt = row.pat_birthdate
+        if (imgDt && patDt) {
+          int years = imgDt[YEAR] - patDt[YEAR]//not generally accurate but it is for input dates already truncated to year level
+          if (years < 0 || years > 120)
+            println "wacky years $years for $imgDt - $patDt"
+          row.study_pat_age_years = years
+        } else
+          println "No img or pat dt? $imgDt $patDt"
+        return row;
+      }
+      ]]></script>
+</dataConfig>
+

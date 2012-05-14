@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Image Processor</title>
+</head>
+<body>
+<h1>Image Processor</h1>
+<form name="process" method="POST" action="process/start">
+<script type="text/javascript"><!--
+function parseURL(url) {
+	var studyId = null, seriesId = null, objectId = null;
+	var re = /([^;&=]+)=([^;&]*)/g;
+	var m;
+	while (m = re.exec(url)) {
+		try {
+			if (m[1] == 'studyUID')
+				studyId = decodeURIComponent(m[2]);
+			if (m[1] == 'seriesUID')
+				seriesId = decodeURIComponent(m[2]);
+			if (m[1] == 'objectUID')
+				objectId = decodeURIComponent(m[2]);
+		} catch (e) {
+			// Ignore, it's most likely a bad URI component
+		}
+	}
+	if (studyId) {
+		document.forms.process.studyUID.value = studyId;
+	}
+	if (seriesId) {
+		document.forms.process.seriesUID.value = seriesId;
+	}
+	if (objectId) {
+		document.forms.process.objectUID.value = objectId;
+	}
+}
+document.writeln('<p>Paste an existing DICOM URL into this text area to automatically populate the fields below:</p><textarea name="all" onchange="parseURL(this.value)" onkeyup="parseURL(this.value)" rows="4" cols="80"></textarea><br>');
+// --></script>
+Study ID: <input type="text" name="studyUID" size="80"><br>
+Series ID: <input type="text" name="seriesUID" size="80"><br>
+Object ID: <input type="text" name="objectUID" size="80"><br>
+<input type="submit">
+</form>
+</body>
+</html>

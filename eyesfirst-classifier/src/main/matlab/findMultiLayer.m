@@ -89,6 +89,7 @@ for ii = 1:bb
             rightPix = rightwardPixTop:rightwardPixBase;
             NpixRight = length(rightPix);
             rightEdgeTermLocInd = min(ceil(locPixInd*(NpixRight/NpixCur)+ mas),NpixRight);
+            rightEdgeTermLocInd = max(rightEdgeTermLocInd, ones(size(rightEdgeTermLocInd)));
             rightEdgeTermInd = rightPix(rightEdgeTermLocInd);
             edgeMat(fi:li,2) =  rightEdgeTermInd';   % rightward pointing edge
             ctEdges = ctEdges +(li-fi)+1;
@@ -195,16 +196,10 @@ for hh = 1:Nlayers
         csRelIm(csRowIndRelIm,ii,hh) = ones(length(csRowIndRelIm),1);
         csRelTop{ii,hh} = cmcs(curCol) - topPixInd(ii,hh) + 1;  % closed surface indices relative to the top
         cmcs(curCol) = zeros(size(curCol));
-        II1 = find(cmcs ~= 0);
+        II1 = cmcs ~= 0;
         cmcs = cmcs(II1);
     end
 end;
 if ~isempty(ofile)
     save(ofile);
 end;
-
-
-
-            
-    
-

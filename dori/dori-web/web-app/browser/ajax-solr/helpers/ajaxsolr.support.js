@@ -1,4 +1,4 @@
-// $Id: ajaxsolr.support.js 115 2011-05-31 17:59:33Z dsmiley $
+// $Id: ajaxsolr.support.js 435 2013-07-10 19:45:18Z dpotter $
 
 /**
  * Strip whitespace from the beginning and end of a string.

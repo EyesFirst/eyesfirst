@@ -20,7 +20,7 @@
 
 (function($){
 	/** @define */
-	var APPLET_VERSION_NAME = "dicom-uploader-applet-0.0.1-SNAPSHOT.jar";
+	var APPLET_VERSION_NAME = "uploader-applet-0.0.2-SNAPSHOT.jar";
 
 	/**
 	 * @constructor
@@ -63,10 +63,11 @@
 		var html = '<object tabindex="0" id="uploaderApplet" type="application/x-java-applet" height="300" width="300">' +
 			'<param name="archive"   value="' + APPLET_VERSION_NAME + '" />' +
 			'<param name="codebase"  value="' + root + '/upload/applet/" />' +
-			'<param name="code"      value="org.mitre.eyesfirst.UploaderApplet" />' +
+			'<param name="code"      value="org.mitre.eyesfirst.applet.UploaderApplet" />' +
 			'<param name="MAYSCRIPT" value="true">' +
 			'<param name="Cookie"    value="JSESSIONID=' + Uploader.SESSION_ID + '" />' +
 			'<param name="hostname"  value="' + location.protocol + '//' + location.host + root + '" />' +
+			'<param name="java_arguments" value="-Djnlp.packEnabled=true" />' +
 			'</object>';
 		// Appending the HTML will IMMEDIATLEY attempt to create the applet,
 		// which is NOT what we want, so defer that a bit. This allows the UI
@@ -300,11 +301,12 @@
 			me._status.text('Please enter EFID');
 			return;
 		}
+		var efid = this._efidField.prop('value');
 		me._status.attr('class', 'efid-status status-checking');
 		me._status.text("Checking...");
 		this._query = $.ajax({
 			url: Uploader.EFID_VERIFIER_URL,
-			data: { id: this._efidField.prop('value') },
+			data: { id: efid },
 			dataType: 'text',
 			error: function(jqXHR, textStatus, errorThrown) {
 				me._status.attr('class', 'efid-status status-failed');
@@ -323,6 +325,7 @@
 				me._verified = true;
 				me._status.attr('class', 'efid-status status-ok');
 				me._status.text("OK");
+				me._uploader.applet.setEFID(efid);
 				me._uploader.updateWizardButtons();
 			},
 			//timeout: 60, // timeout
@@ -412,6 +415,11 @@
 			})(this, field, verify));
 		}
 		return div;
+	};
+
+	ChooseFilesPage.prototype.showPage = function(uploader, container, forwards) {
+		Page.prototype.showPage.call(this, uploader, container, forwards);
+		uploader.setWizardButtonsVisible(true, true);
 	};
 
 	/**

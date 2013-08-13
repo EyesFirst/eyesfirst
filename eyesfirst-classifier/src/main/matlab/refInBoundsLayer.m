@@ -12,7 +12,7 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-function [refSet1,refSet2,refSet3,refSet4] = refInBoundslayer(ii,jj,kk,refPar,Bdrys)
+function [refSet1,refSet2,refSet3,refSet4] = refInBoundsLayer(ii,jj,kk,refPar,Bdrys)
 % Bdrys is a structure such that the retina is confined to  Bdrys.top and
 % Bdrys.floor.  The CFAR structure maintains the same proportion between
 % top and floor as the test pixel

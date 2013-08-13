@@ -7,7 +7,8 @@ import javax.servlet.ServletContext
 HttpServletRequest request = request;
 HttpServletResponse response = response;
 ServletContext context = context;
-private final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(getClass());
+
+final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(getClass());
 
 final targetURL = context.getInitParameter('solrURL') ?: grails.util.GrailsConfig['eyesfirst.solrURL'];
 assert targetURL;
@@ -20,6 +21,8 @@ final keepHeaders = ['Accept','Accept-Encoding','Cache-Control','Content-Type','
 //--set up target connection
 final url = new URL(targetURL+"?"+request.getQueryString());
 final urlCon = (HttpURLConnection) url.openConnection(Proxy.NO_PROXY);
+
+log.info("Connect to $url")
 
 urlCon.setDoOutput(false);
 urlCon.setDoInput(true);

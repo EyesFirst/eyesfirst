@@ -48,12 +48,15 @@ class DiagnosisController {
 		}
 
 		def diagnosis = getDiagnosis(rawQueryString)
-		if (diagnosis == null) diagnosis = new Diagnosis()
+		if (diagnosis == null)
+			diagnosis = new Diagnosis()
 		diagnosis.setReviewer(springSecurityService.getCurrentUser())
 		diagnosis.setHardExudates(parseBoolean(request.getParameter("hardExudates")))
 		diagnosis.setAbnormalRetinalThickness(parseBoolean(request.getParameter("abnormalRetinalThickness")))
 		diagnosis.setMicroaneurysms(parseBoolean(request.getParameter("microaneurysms")))
 		diagnosis.setNeovascularization(parseBoolean(request.getParameter("neovascularization")))
+		diagnosis.setDiagnosis(request.getParameter("diagnosis"))
+		diagnosis.setPlan(request.getParameter("plan"))
 		diagnosis.setNotes(request.getParameter("notes"))
 
 		image.addToDiagnoses(diagnosis)

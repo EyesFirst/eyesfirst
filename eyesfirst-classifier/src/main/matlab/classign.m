@@ -21,7 +21,17 @@ randv=rand(nobs,1);
 ccld=cumsum(cclp,2);
 ccld=ccld-repmat(randv,1,ncl);
 ccla=zeros(nobs,1);
-for ii =1:nobs
-    I1=find(ccld(ii,:) >=0);
-    ccla(ii)=I1(1);
-end;
+% for ii =1:nobs
+%     I1=find(ccld(ii,:) >=0,1,'first');
+%     ccla(ii)=I1(1);
+% end;
+% here is a non-looping version
+[row,col] = find(ccld >= 0);
+linInd = sub2ind([nobs,ncl],row,col);
+logicMat = zeros(nobs,ncl);
+logicMat(linInd) = ones(size(linInd));
+cumSumLogic = cumsum(logicMat,2);
+[row2,col2] = find(cumSumLogic == 1);
+[sortRow2,Isort] = sort(row2);
+%chk = ccla-col2(Isort);
+ccla = col2(Isort);

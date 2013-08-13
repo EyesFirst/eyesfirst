@@ -49,7 +49,7 @@ for ii = 1:Nfiles
                     [aa,bb,cc] = size(SAA);
                     sliceRange = [1 cc];
                 end;
-                [polyGate,SAATB] = initialLayerId(SAA,ofile,edf,ndil,sliceRange);       
+                [polyGate,SAATB] = initialLayerId_4b_v2(SAA,ofile,edf,ndil,sliceRange);       
             end;
         end;
     %end

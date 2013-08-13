@@ -22,11 +22,15 @@ class Feedback {
 	User reviewer
 	Boolean affirmAbnormalRetinalThickness
 	Boolean affirmHardExudates
+	String diagnosis
+	String plan
 	String processedNotes
 
 	static constraints = {
 		affirmHardExudates nullable: true
 		affirmAbnormalRetinalThickness nullable: true
+		diagnosis nullable: true
+		plan nullable: true
 		processedNotes nullable: true
 	}
 }

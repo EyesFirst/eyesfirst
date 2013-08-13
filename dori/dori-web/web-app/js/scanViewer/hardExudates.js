@@ -93,7 +93,9 @@ function HardExudate(json) {
 	this.normalScore = json['normalScore'];
 	this.layer = json['layer'];
 	this.numVoxels = json['numVoxels'];
-	var p = json["boundingBoxMinCorner"];
+	// For backwards compatability reasons, use boundingBoxMinCorner if
+	// boundingBoxMinCornerShift isn't in the JSON
+	var p = "boundingBoxMinCornerShift" in json ? json["boundingBoxMinCornerShift"] : json["boundingBoxMinCorner"];
 	var d = json["boundingBoxWidth"];
 	// Coordinates are in order columns, layers, rows
 	// (or fast time, slow time, axial)

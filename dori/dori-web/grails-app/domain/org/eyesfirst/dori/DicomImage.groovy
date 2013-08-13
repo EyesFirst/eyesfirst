@@ -26,12 +26,13 @@ class DicomImage {
 	String objectUid				//SOP Instance UID of raw DICOM object
 	byte[] thicknessMap				//Thickness map, a PNG image
 	FundusPhoto fundusPhoto			//Fundus Photo, a PNG image
+	FundusPhoto bloodVesselFundus	// Blood vessel photo
 	FundusPhoto synthesizedFundusPhoto
 	Date dateCreated
 	Date lastUpdated
 
 	static belongsTo = [efid : Efid]
-	static hasMany = [feedback : Feedback, diagnoses: Diagnosis]
+	static hasMany = [feedback : Feedback, diagnoses: Diagnosis, annotations: ImageAnnotation]
 
 	static mapping = {
 		version false
@@ -52,6 +53,35 @@ class DicomImage {
 		thicknessMap nullable: true
 		thicknessMap maxSize: 1000000000
 		fundusPhoto nullable: true
+		bloodVesselFundus nullable: true
 		synthesizedFundusPhoto nullable: true
+	}
+
+	public static DicomImage findByDicomID(String studyUID, String seriesUID, String objectUID) {
+		return findByDicomID(new org.mitre.eyesfirst.dicom.DicomID(studyUID, seriesUID, objectUID));
+	}
+
+	public static DicomImage findByDicomID(org.mitre.eyesfirst.dicom.DicomID dicomId) {
+		return findByDicomURL(dicomId.toQueryString());
+	}
+
+	public static DicomImage findByDicomURL(String dicomURL) {
+		DicomImage result = findByRawQueryString(dicomURL);
+		if (result == null) {
+			result = findByProcessedQueryString(dicomURL);
+		}
+		return result;
+	}
+
+	public Diagnosis findDiagnosisForUser(User user) {
+		if (diagnoses == null) {
+			// I think this can't actually happen, but pretend it can anyway
+			return null
+		}
+		for (Diagnosis d : diagnoses) {
+			if (d.reviewer.equals(user))
+				return d
+		}
+		return null
 	}
 }

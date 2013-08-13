@@ -7,7 +7,7 @@ import javax.servlet.ServletContext
 HttpServletRequest request = request;
 HttpServletResponse response = response;
 ServletContext context = context;
-private final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(getClass());
+final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(getClass());
 
 final wadoURL = context.getInitParameter('wadoURL') ?: grails.util.GrailsConfig['eyesfirst.wadoURL'];
 assert wadoURL;

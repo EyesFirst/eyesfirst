@@ -34,9 +34,18 @@ eyes_first_data_dir = '/Users/dpotter/EyesFirst/data';%/opt/eyesfirst/data';
 %curTask = 'generateStatistics';
 %curTask = 'identifyInternalLayers';
 % curTask = 'smoothInternalLayers';
-curTask = 'GenerateExceedanceClusters';
+% curTask = 'GenerateExceedanceClusters';
 % For testing only partial slices, use the following:
 %curTask = 'initialLayerBdrys';
+ curTask = 'evaluateClusters';
+
+% ALSO CHANGE THIS TO MATCH YOUR MACHINE
+evaluateClusterPar.splineFile = '/opt/eyesfirst/eyesfirst/matlab/HESplineFile';
+evaluateClusterPar.statsFile = '/opt/eyesfirst/eyesfirst/matlab/trainingStats_ppl_2';
+evaluateClusterPar.normPrctFile = '/opt/eyesfirst/eyesfirst/matlab/normalTrainingPercentilesstatInd_1';
+
+
+
 
 % taskList = {'dicom2mat','motionCorrect','initialGating','initialLayerBdrys','initialLayerBoundarySmoothing','generateThicknessMaps','generateStatistics','identifyInternalLayers','smoothInternalLayers','CFARProcess','GenerateExceedanceClusters','CalculateMomentsExceedClust'};
  dicomDirs = { eyes_first_data_dir };
@@ -49,7 +58,8 @@ subsidiaryDirs = { eyes_first_data_dir,...
     strcat(eyes_first_data_dir, filesep, 'storeLayerBdrys'),...
     strcat(eyes_first_data_dir, filesep, 'storeStats'),...
     strcat(eyes_first_data_dir, filesep, 'storeCfar'),...
-    strcat(eyes_first_data_dir, filesep, 'storeOutput') };
+    strcat(eyes_first_data_dir, filesep, 'storeOutput'),...
+    strcat(eyes_first_data_dir, filesep, 'storeClusterFeatures') };
 outFileDirs.mat = 'storeMats';
 outFileDirs.motionCorrect = 'storeMotionCorrected';
 outFileDirs.gate = 'storeGates';
@@ -57,6 +67,7 @@ outFileDirs.layers = 'storeLayerBdrys';
 outFileDirs.stats = 'storeStats';
 outFileDirs.cfar = 'storeCfar';
 outFileDirs.output = 'storeOutput';
+outFileDirs.cff = 'storeClusterFeatures';
 smoothingPar.xdeg = 2;
 smoothingPar.zdeg = 2;
 gatingPar.edf = 5;
@@ -121,7 +132,8 @@ for ii = 1:length(subsidiaryDirs)
 end;
 fileArrayFileIn = [];
 fileArrayFileOut = 'fileArray1';
-runEyesFirstCC(curTask,dicomDirs,subsidiaryDirs,fileArrayFileIn,fileArrayFileOut,internalLayerPar,initialLayerPar,gatingPar,smoothingPar,intLayerSmoothingPar,layerSmoothingPar,thicknessPar,statPar,cfarPar,cfarClusterPar,outFileDirs,indexSet)
+runEyesFirstCC(curTask,dicomDirs,subsidiaryDirs,fileArrayFileIn,fileArrayFileOut,internalLayerPar,initialLayerPar,gatingPar,smoothingPar,intLayerSmoothingPar,layerSmoothingPar,thicknessPar,statPar,cfarPar,cfarClusterPar,evaluateClusterPar,outFileDirs,indexSet)
+%runEyesFirstCC(curTask,dicomDirs,subsidiaryDirs,fileArrayFileIn,fileArrayFileOut,internalLayerPar,initialLayerPar,gatingPar,smoothingPar,intLayerSmoothingPar,layerSmoothingPar,thicknessPar,statPar,cfarPar,cfarClusterPar,outFileDirs,indexSet)
 
 end
 

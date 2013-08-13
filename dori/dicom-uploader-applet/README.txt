@@ -1,19 +1,32 @@
-To create the Applet file, use the Maven build script:
+As the uploader system is a "child" of the uploader applet, it is no longer
+signed as part of the default Maven build. This proved to be too obnoxious, as
+not having set up the applet for signing would cause the build to fail. Instead,
+the applet is now built via an Ant script.
 
-	mvn package
+Maven is still required to build the artifacts, the Ant script is merely used
+to sign the applet.
 
-This will fail because it won't be able to sign the applet. In order to sign the
-applet, you first will need to create a keystore:
+Basically, first build the entire thing using `mvn package` at the root of the
+project. Then, go into this directory and run `ant`.
 
-	keytool -genkeypair -alias DicomUploader -keystore DcmUploader.keystore -validity 365
+This will fail at first because it won't be able to sign the applet because the
+private key isn't checked into source control for what should be obvious
+reasons. In order to sign the applet, you first will need to create a keystore:
+
+    keytool -genkeypair -alias DicomUploader -keystore DcmUploader.keystore -validity 365
 
 Once that's done, you can build the applet with the following command:
 
-	mvn -Djarsigner.storepass=<password> -Djarsigner.keypass=<password> package
+    mvn -Djarsigner.storepass=<password> -Djarsigner.keypass=<password> package
 
 This will create and sign the JAR files in the "target" directory.
 
-******************************
+Note that this creates a self-signed applet, which causes users to get a scary
+security warning when running the applet. The only way to avoid that is to get
+an actual code-signing certificate that's verified by a certificate provider
+that Java itself trusts.
+
+--------------------------------------------------------------------------------
 
 To upload files:
 

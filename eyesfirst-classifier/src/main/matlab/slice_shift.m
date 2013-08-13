@@ -22,7 +22,11 @@ hbbp1 = (bb/2)+1;
 for i_y = 1:cc-1
     s1=double(squeeze(A(:,:,i_y)));
     s2=double(squeeze(A(:,:,i_y+1)));
-    c12=ifft2(fft2(s1).*conj(fft2(s2)));
+    t1 = fft2(s2);
+    t2 = conj(t1);
+    t3 = fft2(s1);
+    t4 = t3.*t2;
+    c12=ifft2(t4);
     c12=fftshift(c12);
     %figure(3),mesh(fftshift(c12))
     [value,index]=max(c12(:));
@@ -36,7 +40,7 @@ end
 % useful anyway.
 % figure(5),subplot(211),plot(1:cc-1,z_array,'r.',1:cc-1,z_array,'b'),title('Z shift')
 % figure(5),subplot(212),plot(1:cc-1,x_array,'r.',1:cc-1,x_array,'b'),title('X shift')
-SAA = shiftAlignImage(A,z_array,x_array,zdeg,xdeg);
+SAA = shiftAlignImage_v2(A,z_array,x_array,zdeg,xdeg);
 if ~isempty(ofile)
    save(ofile,'SAA');
 end;

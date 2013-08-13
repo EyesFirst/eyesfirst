@@ -18,8 +18,15 @@ if (console.error) {
 }
 
 $(document).ajaxError(function(e, jqxhr, settings, exception) {
-  //TODO if authentication failure, do something else.
-  alert(alert('An error occured. Try reloading the page.'));
+	if (jqxhr.status == 302) {
+		// Authentication failure. Forward the entire page to the login page?
+		alert("You appear to have been logged out.");
+	} else {
+		// TODO if authentication failure, do something else.
+		console.log(settings);
+		console.log(exception);
+		alert('An error occured. Try reloading the page.');
+	}
 });
 
 //-- INITIALIZE NON-AJAX-SOLR STUFF

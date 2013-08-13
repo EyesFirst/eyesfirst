@@ -1,24 +1,26 @@
 <%@page import="grails.util.GrailsConfig"
 %><!DOCTYPE html>
+<%--
+Copyright 2012 The MITRE Corporation
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+--%>
 <html>
  <head>
   <title>Upload DICOM Scans</title>
-  <link type="text/css" rel="stylesheet" href="${resource(dir:'css',file:'upload.css')}">
-  <jq:resources/>
-  <jqui:resources/>
   <dori:favicon/>
-  <g:javascript src="errorBox.js"/>
-  <g:javascript src="progressFavIcon.js"/>
-  <g:javascript src="upload/jquery.textchange.js"/>
-  <g:javascript src="upload/upload-wizard.js"/>
-  <g:javascript src="upload/upload-start.js"/>
-  <g:javascript src="upload/upload-deid.js"/>
-  <g:javascript src="upload/upload-send.js"/>
-  <g:javascript>Uploader.setEFIDIssuerURL("${createLink(controller:'efid', action:'issue') }");
-Uploader.setEFIDVerifyierURL("${createLink(controller:'efid', action:'verify')}");
-Uploader.setSessionId("<%=session.getId()%>");
-jQuery(function() { new Uploader('#uploader'); });</g:javascript>
+  <r:require module="uploader"/>
+  <r:layoutResources/>
  </head>
  <body>
   <noscript>
@@ -50,5 +52,10 @@ jQuery(function() { new Uploader('#uploader'); });</g:javascript>
    Privacy Rule</a> and EyesFirst policy. While the data upload process attempts to verify that the data being uploaded is de-identified, you (as the owner of the data) must review the data and confirm that it does not contain PHI.
 
   </div>
+  <g:javascript>Uploader.setEFIDIssuerURL("${createLink(controller:'efid', action:'issue') }");
+Uploader.setEFIDVerifyierURL("${createLink(controller:'efid', action:'verify')}");
+Uploader.setSessionId("<%=session.getId()%>");
+jQuery(function() { new Uploader('#uploader'); });</g:javascript>
+  <r:layoutResources/>
  </body>
 </html>

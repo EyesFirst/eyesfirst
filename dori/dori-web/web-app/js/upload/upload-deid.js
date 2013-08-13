@@ -40,6 +40,7 @@
 		div.append(this._taskProgress = $('<div/>'));
 		this._taskProgress.progressbar();
 		this._taskProgress.hide();
+		div.append(this._descriptionText = $('<div/>'));
 		div.append(this._form = $('<form method="GET" action="" onsubmit="return false;"></form>'));
 		div.append(this._fileTable = $('<table/>').addClass('deid-results'));
 		div.append(this._confirmDialog =
@@ -57,6 +58,9 @@
 			this._uploader = uploader;
 			uploader.setWizardButtonsVisible(false);
 			this._taskMessage.text("Processing ZIP files");
+			this._statusMessage.show();
+			this._subTaskMessage.hide();
+			this._descriptionText.text('');
 			var me = this;
 			uploader.setStep("deid-run");
 			var index = 1;
@@ -89,16 +93,22 @@
 						me._taskProgress.progressbar('option', 'value', percent);
 					}
 				},
-				displayDicomFile: function(json) {
+				displayDicomFile: function(json, hasFundus) {
 					me._addDicomFile('DICOM File ' + (index++), $.parseJSON(json));
 				},
 				done: function() {
 					$.favicon('reset');
-					me._taskMessage.text("Verify Anonymized Data");
 					me._statusMessage.hide();
 					me._subTaskMessage.hide();
 					me._taskProgress.hide();
-					me._statusMessage.after('<p>Please verify that the following metadata has had personally identifying information removed.</p>');
+					if (me._files.length == 0) {
+						me._taskMessage.text("No Suitable DICOM Files Found");
+						me._descriptionText.text('No suitable DICOM files were found in the files provided. Please try again with different files.');
+						uploader.setWizardButtonsVisible(true, false);
+						return;
+					}
+					me._taskMessage.text("Verify Anonymized Data");
+					me._descriptionText.text('Please verify that the following metadata has had personally identifying information removed.');
 					me._done = true;
 					uploader.setWizardButtonsVisible(false, true);
 					uploader.setNextText("Upload Anonymized Files");

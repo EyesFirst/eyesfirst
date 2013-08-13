@@ -15,7 +15,6 @@
  */
 (function ($) {
 
-//var WADOPATH = "http://eyesfirst.mitre.org/wado"
 var WADOPATH = "wado.groovy";
 var EFREGEX = /^EF[A-Z0-9]{8}[0-9]$/;
 

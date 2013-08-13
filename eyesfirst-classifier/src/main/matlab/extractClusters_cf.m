@@ -12,7 +12,7 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-function candidateHE = extractClusters_cf(cf,layerScoreThresh)
+function candidateHE = extractClusters_cf(cf,layerScoreThresh,layerBdrys,axialBuffer,fastBuffer,sliceBuffer,sizeCFAR)
 
 Nclust = length(cf);
 scoresLayer = zeros(Nclust,2);
@@ -27,7 +27,7 @@ for jj = 1:Nlayers
     curLayer = layerScoreThresh(jj,1);
     curThresh = layerScoreThresh(jj,2);
     I1 = find(scoresLayer(:,2) == curLayer & scoresLayer(:,1) >= curThresh);
-    if length(I1) > 0
+    if ~isempty(I1)
         for ii = 1:length(I1)
             % sort in descending order
             curScores = scoresLayer(I1,1);
@@ -51,8 +51,25 @@ for jj = 1:Nlayers
             candidateHE(ctHE).boundingBoxMinCorner = minvPix;
             candidateHE(ctHE).boundingBoxWidth = BBwidth;
             candidateHE(ctHE).numVoxels = cf{I1(I1sort(ii))}.Npix;
+            % changes added 08_06_12 to include a field with shifted
+            % indices David Stein
+            %%
+             minVox = candidateHE(ctHE).boundingBoxMinCorner;
+            boxWidth = candidateHE(ctHE).boundingBoxWidth;
+            minAxial = minVox(3)-axialBuffer;
+            minFast = minVox(1)-fastBuffer;
+            minSlow = minVox(2);
+            delAxial = boxWidth(3)+axialBuffer;
+            delFast = boxWidth(1)+fastBuffer;
+            delSlow = boxWidth(2);
+            sliceRange = max([minSlow-sliceBuffer,1]):min([minSlow+delSlow-1+sliceBuffer,sizeCFAR(3)]);
+            curShift = layerBdrys{sliceRange(1)}.curxaug(1)-1;
+            candidateHE(ctHE).boundingBoxMinCornerShift = candidateHE(ctHE).boundingBoxMinCorner;
+            candidateHE(ctHE).boundingBoxMinCornerShift(1) = minFast+curShift;
+            candidateHE(ctHE).boundingBoxMinCornerShift(2) = minSlow;
+            candidateHE(ctHE).boundingBoxMinCornerShift(3) = minAxial;
+            % end of changes
+    %%
         end;
     end;
 end;
-
-

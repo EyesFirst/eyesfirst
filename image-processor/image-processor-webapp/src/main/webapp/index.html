@@ -1,45 +1,27 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+Copyright 2013 The MITRE Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Refresh" content="0;URL=admin/">
 <title>Image Processor</title>
 </head>
 <body>
 <h1>Image Processor</h1>
-<form name="process" method="POST" action="process/start">
-<script type="text/javascript"><!--
-function parseURL(url) {
-	var studyId = null, seriesId = null, objectId = null;
-	var re = /([^;&=]+)=([^;&]*)/g;
-	var m;
-	while (m = re.exec(url)) {
-		try {
-			if (m[1] == 'studyUID')
-				studyId = decodeURIComponent(m[2]);
-			if (m[1] == 'seriesUID')
-				seriesId = decodeURIComponent(m[2]);
-			if (m[1] == 'objectUID')
-				objectId = decodeURIComponent(m[2]);
-		} catch (e) {
-			// Ignore, it's most likely a bad URI component
-		}
-	}
-	if (studyId) {
-		document.forms.process.studyUID.value = studyId;
-	}
-	if (seriesId) {
-		document.forms.process.seriesUID.value = seriesId;
-	}
-	if (objectId) {
-		document.forms.process.objectUID.value = objectId;
-	}
-}
-document.writeln('<p>Paste an existing DICOM URL into this text area to automatically populate the fields below:</p><textarea name="all" onchange="parseURL(this.value)" onkeyup="parseURL(this.value)" rows="4" cols="80"></textarea><br>');
-// --></script>
-Study ID: <input type="text" name="studyUID" size="80"><br>
-Series ID: <input type="text" name="seriesUID" size="80"><br>
-Object ID: <input type="text" name="objectUID" size="80"><br>
-<input type="submit">
-</form>
+<p>Please use the <a href="admin/">Admin page</a>.</p>
 </body>
 </html>

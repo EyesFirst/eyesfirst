@@ -25,7 +25,7 @@ class BootStrap {
 		def browseRole = Role.findByAuthority('ROLE_BROWSE') ?: new Role(authority: 'ROLE_BROWSE').save(failOnError: true)
 
 		def adminUser = User.findByUsername('admin') ?: new User(
-				username: 'admin', email: 'jsutherland@mitre.org',
+				username: 'admin', email: 'ssemy@mitre.org',
 				password: 'admin',
 				enabled: true).save(failOnError: true)
 

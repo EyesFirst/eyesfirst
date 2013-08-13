@@ -23,13 +23,10 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Iterator;
 
-import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -44,11 +41,12 @@ import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.codehaus.jackson.JsonGenerationException;
-import org.dcm4che2.data.DicomElement;
 import org.dcm4che2.data.DicomObject;
-import org.dcm4che2.data.Tag;
 import org.dcm4che2.io.DicomInputStream;
-import org.mitre.eyesfirst.viewer.web.DicomJSONConverter;
+import org.mitre.eyesfirst.dicom.BasicDicomImage;
+import org.mitre.eyesfirst.dicom.DicomImageException;
+import org.mitre.eyesfirst.dicom.DicomJSONConverter;
+import org.mitre.eyesfirst.dicom.DicomMetadataUtil;
 
 /**
  * Simple utility to test the DICOM features.
@@ -126,58 +124,48 @@ public class DicomTestUtil {
 		if (f == null)
 			throw new NullPointerException();
 		fileChooser.setCurrentDirectory(f.getParentFile());
+		BasicDicomImage image;
 		DicomObject obj;
 		try {
-			obj = new DicomInputStream(new FileInputStream(f)).readDicomObject();
+			image = new BasicDicomImage(new FileInputStream(f));
+			obj = image.getDicomObject();
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(frame, "Unable to open DICOM file: " + e, "Error Loading DICOM", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		metadataTableModel.setDicomObject(obj);
-		double aspectRatio = DicomJSONConverter.findAspectRatio(obj);
+		double aspectRatio = DicomMetadataUtil.findAspectRatio(obj);
 		System.out.println("Aspect ratio=" + aspectRatio);
-		Iterator<DicomElement> iter = obj.iterator();
-		while (iter.hasNext()) {
-			DicomElement elem = iter.next();
-			if (elem.tag() == Tag.PixelData) {
-				byte[] pixels;
-				if (elem.hasItems()) {
-					pixels = elem.getFragment(elem.countItems() / 2);
-				} else {
-					pixels = elem.getBytes();
-				}
-				BufferedImage image;
-				try {
-					image = ImageIO.read(new ByteArrayInputStream(pixels));
-					System.out.println("Image: " + image);
-					if (image == null) {
-						displayArea.setText("Unable to read image data.");
-						displayArea.setIcon(null);
-					} else {
-						displayArea.setText("");
-						int width = image.getWidth();
-						int height = image.getHeight();
-						if (aspectRatio > 1.0) {
-							width = (int)(width * aspectRatio + 0.5);
-						} else {
-							height = (int)(height / aspectRatio + 0.5);
-						}
-						displayArea.setIcon(new DicomIcon(image, width, height));
-					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		BufferedImage slice = null;
+		try {
+			slice = image.getSlice(0);
+		} catch (DicomImageException e) {
+			// TODO Display this to the user
+			e.printStackTrace();
+		}
+		System.out.println("Image: " + slice);
+		if (slice == null) {
+			displayArea.setText("Unable to read image data.");
+			displayArea.setIcon(null);
+		} else {
+			displayArea.setText("");
+			int width = slice.getWidth();
+			int height = slice.getHeight();
+			if (aspectRatio > 1.0) {
+				width = (int)(width * aspectRatio + 0.5);
+			} else {
+				height = (int)(height / aspectRatio + 0.5);
 			}
+			displayArea.setIcon(new DicomIcon(slice, width, height));
 		}
 		try {
 			DicomJSONConverter.convertToJSON(obj, System.out);
 		} catch (JsonGenerationException e) {
-			// TODO Auto-generated catch block
+			// TODO Display this to the user
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// TODO Display this to the user
 			e.printStackTrace();
 		}
 	}

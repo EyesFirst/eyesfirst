@@ -1,4 +1,4 @@
-// $Id: PagerWidget.js 174 2011-09-16 21:35:10Z dsmiley $
+// $Id: PagerWidget.js 435 2013-07-10 19:45:18Z dpotter $
 
 (function ($) {
 
@@ -10,6 +10,8 @@
  * @expects this.target to be a list.
  * @class PagerWidget
  * @augments AjaxSolr.AbstractWidget
+ * @todo Don't use the manager to send the request. Request only the results,
+ * not the facets. Update only itself and the results widget.
  */
 AjaxSolr.PagerWidget = AjaxSolr.AbstractWidget.extend(
   /** @lends AjaxSolr.PagerWidget.prototype */
@@ -98,7 +100,7 @@ AjaxSolr.PagerWidget = AjaxSolr.AbstractWidget.extend(
 
     var prev = null;
 
-    var visible = this.visiblePageNumbers();
+    visible = this.visiblePageNumbers();
     for (var i = 0, l = visible.length; i < l; i++) {
       if (prev && visible[i] > prev + 1) links.push(this.gapMarker());
       links.push(this.pageLinkOrSpan(visible[i], [ 'pager-current' ]));
@@ -181,22 +183,10 @@ AjaxSolr.PagerWidget = AjaxSolr.AbstractWidget.extend(
   clickHandler: function (page) {
     var self = this;
     return function () {
-      self.manager.store.get('start').val((page - 1) * self.getRows());
-      self.manager.doRequest();
+      self.manager.store.get('start').val((page - 1) * self.perPage());
+      self.doRequest();
       return false;
-    };
-  },
-
-  /**
-   * @returns {Number} The maximum number of rows in a page.
-   */
-  getRows: function () {
-    var rows = this.manager.response.responseHeader.params.rows;
-    if (rows == null)
-      rows = this.manager.store.get('rows').value;
-    if (rows == null)
-      rows = 10;//Solr default
-    return parseInt(rows);//implicit string conversion
+    }
   },
 
   /**
@@ -252,12 +242,24 @@ AjaxSolr.PagerWidget = AjaxSolr.AbstractWidget.extend(
     }
   },
 
+  /**
+   * @returns {Number} The number of results to display per page.
+   */
+  perPage: function () {
+    return parseInt(this.manager.response.responseHeader && this.manager.response.responseHeader.params && this.manager.response.responseHeader.params.rows || this.manager.store.get('rows').val() || 10);
+  },
+
+  /**
+   * @returns {Number} The Solr offset parameter's value.
+   */
+  getOffset: function () {
+    return parseInt(this.manager.response.responseHeader && this.manager.response.responseHeader.params && this.manager.response.responseHeader.params.start || this.manager.store.get('start').val() || 0);
+  },
+
   afterRequest: function () {
-    var resp = this.manager.response;
-    var offset = parseInt(resp.response.start);
-    var total = parseInt(resp.response.numFound);
-    var thisPage = resp.response.docs.length;
-    var perPage = this.getRows();
+    var perPage = this.perPage();
+    var offset  = this.getOffset();
+    var total   = parseInt(this.manager.response.response.numFound);
 
     // Normalize the offset to a multiple of perPage.
     offset = offset - offset % perPage;

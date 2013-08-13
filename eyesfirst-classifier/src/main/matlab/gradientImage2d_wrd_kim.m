@@ -12,7 +12,7 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-function [gim,g2im,kim] = gradientImage2d_wrd_kim(im,sdv,mf,ofilebase)
+function [gim,g2im,kim] = gradientImage2d_wrd_kim(im,sdv,mf,ofilebase,pixelDim)
 % [gim,g2im] = gradientImage(im)
 % if g1flag == 1, computes the gradient image, returned in gim, and if g2flag == 1, the derivative of the
 % gradient image in the direction of the gradient, returned in
@@ -23,8 +23,8 @@ function [gim,g2im,kim] = gradientImage2d_wrd_kim(im,sdv,mf,ofilebase)
 % filter is scaled to have the same magnitude in microns in each direction,
 % and if sdv is a two vector the component values are used without scaling
     %
-dx = 1.9531; % pixel length (microns) in axial direction
-dy = 11.7188; % pixel length (microns) in fast time direction
+dx = pixelDim.axial; % pixel length (microns) in axial direction
+dy = pixelDim.fastTime; % pixel length (microns) in fast time direction
 g1flag = 1;
 g2flag = 1;
 n1 = 1;

@@ -12,7 +12,7 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-function cf = clusterFeatures(cfarSAA,exceedClusters,layerBoundaries,stats)
+function cf = clusterFeatures(cfarSAA,exceedClusters,layerBoundaries,stats,pixelDim)
 % calculates features of the clusters
 % geometric characterization
 %    convexhull of cluster in pixel space
@@ -40,9 +40,9 @@ function cf = clusterFeatures(cfarSAA,exceedClusters,layerBoundaries,stats)
 %     stats2{ii}.invCovMat = inv(stats2{ii}.covMat);
 % end;
 cp = [1 1 1]; % origin of pixel coordinate system
-dy = 46.875; % microns per pixel slow time 
-dx = 11.7188; % microns per pixel fast time
-dz = 1.9531; % microns per pixel axial
+dy = pixelDim.slowTime; % microns per pixel slow time 
+dx = pixelDim.fastTime; % microns per pixel fast time
+dz = pixelDim.axial; % microns per pixel axial
 dmu = [dx dy dz];
 psf = dz/2; % point spread function is assumed to be a cube of side length 2*psf
 p2d = diag(dmu); % pixel 2 distance conversion matrix

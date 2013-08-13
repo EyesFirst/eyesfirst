@@ -1,14 +1,16 @@
-// $Id: ParameterHashStore.js 115 2011-05-31 17:59:33Z dsmiley $
+// $Id: ParameterHashStore.js 435 2013-07-10 19:45:18Z dpotter $
 
 /**
  * A parameter store that stores the values of exposed parameters in the URL
  * hash to maintain the application's state.
  *
  * <p>The ParameterHashStore observes the hash for changes and loads Solr
- * parameters from the hash if it observes a change or if the hash is empty.</p>
+ * parameters from the hash if it observes a change or if the hash is empty.
+ * The onhashchange event is used if the browser supports it.</p>
  *
  * @class ParameterHashStore
  * @augments AjaxSolr.ParameterStore
+ * @see https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange
  */
 AjaxSolr.ParameterHashStore = AjaxSolr.ParameterStore.extend(
   /** @lends AjaxSolr.ParameterHashStore.prototype */
@@ -50,7 +52,25 @@ AjaxSolr.ParameterHashStore = AjaxSolr.ParameterStore.extend(
    */
   init: function () {
     if (this.exposed.length) {
-      this.intervalId = window.setInterval(this.intervalFunction(this), this.interval);
+      // Check if the browser supports the onhashchange event
+      // IE 8 and 9 in compatibility mode report that they support onhashchange when they 
+      // really don't - Check document.documentMode to ensure it's undefined or greater 
+      // than 7.
+      if ('onhashchange' in window && (!document.documentMode || document.documentMode > 7)) {
+        if (window.addEventListener) {
+          window.addEventListener('hashchange', this.intervalFunction(this), false);
+        }
+        else if (window.attachEvent) {
+          window.attachEvent('onhashchange', this.intervalFunction(this));
+        }
+        else {
+          window.onhashchange = this.intervalFunction(this);
+        }
+      }
+      else {
+        // No onhashchange event so fall back to timer
+        this.intervalId = window.setInterval(this.intervalFunction(this), this.interval);
+      }
     }
   },
 
@@ -71,7 +91,7 @@ AjaxSolr.ParameterHashStore = AjaxSolr.ParameterStore.extend(
   },
 
   /**
-   * @see ParameterHash#storedString()
+   * @see ParameterStore#storedString()
    */
   storedString: function () {
     // Some browsers automatically unescape characters in the hash, others
@@ -93,14 +113,8 @@ AjaxSolr.ParameterHashStore = AjaxSolr.ParameterStore.extend(
     return function () {
       // Support the back/forward buttons. If the hash changes, do a request.
       var hash = self.storedString();
-      if (hash.length) {
-        if (self.hash != hash) {
-          self.load();
-          self.manager.doRequest();
-        }
-      }
-      else {
-        // AJAX Solr is loading for the first time, or the user deleted the hash.
+      if (self.hash != hash && decodeURIComponent(self.hash) != decodeURIComponent(hash)) {
+        self.load();
         self.manager.doRequest();
       }
     }

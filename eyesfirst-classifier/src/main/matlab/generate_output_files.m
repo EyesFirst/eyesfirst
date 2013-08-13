@@ -12,7 +12,7 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-function [ ] = generate_output_files( original_file, out_prefix, layer_boundary_data, thickness_map )
+function [ ] = generate_output_files( original_file, out_prefix, layer_boundary_data )
 %generate_output_files Generates output files.
 %   Generates the various output files.
 %
@@ -26,7 +26,6 @@ function [ ] = generate_output_files( original_file, out_prefix, layer_boundary_
 
     metadata = dicominfo(original_file);
     save_dicom(layer_boundary_data, [ out_prefix, '_processed.dcm' ], metadata);
-    save_thickness_map(thickness_map, [ out_prefix, '_synthesized_fundus.png' ]);
 
 end
 

@@ -12,7 +12,9 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-function fileArray = eyesFirstCC(fileArray,indexSet,outFileDirs,analysisTasks,smoothingPar,gatingPar,initialLayerPar,layerSmoothingPar,thicknessPar,statPar,internalLayerPar,intLayerSmoothingPar,cfarPar,cfarClusterPar)
+function fileArray = eyesFirstCC(fileArray,indexSet,outFileDirs,analysisTasks,smoothingPar,gatingPar,initialLayerPar,layerSmoothingPar,thicknessPar,statPar,internalLayerPar,intLayerSmoothingPar,cfarPar,cfarClusterPar,evaluateClusterPar)
+
+%eyesFirstCC(fileArray,indexSet,outFileDirs,analysisTasks,smoothingPar,gatingPar,initialLayerPar,layerSmoothingPar,thicknessPar,statPar,internalLayerPar,intLayerSmoothingPar,cfarPar,cfarClusterPar)
 
 % assume that the initial fileArray has been created outside of this
 % program so that indexSet can refer to a list of files known at runtime
@@ -22,13 +24,23 @@ if analysisTasks(1) == 1  % read dicom files
     fileArray = readDicomListNormal(fileArray,indexSet,outFileDirs.mat);
 end;
 fprintf('STATUS:{"message":"Running motion correction..."}\n');
+benchmark = now;
 if analysisTasks(2) == 1 % do the motion correction
     fileArray = run_sliceShift(fileArray,indexSet,outFileDirs.motionCorrect,smoothingPar);
 end;
+benchmark = now - benchmark;
+fprintf('BENCHMARK: Gating took ');
+print_time(benchmark);
+fprintf('\n');
 fprintf('STATUS:{"message":"Running gating..."}\n');
+benchmark = now;
 if analysisTasks(3) == 1 % do the gating
     fileArray = runGating(fileArray,indexSet,outFileDirs.gate,gatingPar);
 end;
+benchmark = now - benchmark;
+fprintf('BENCHMARK: Gating took ');
+print_time(benchmark);
+fprintf('\n');
 fprintf('STATUS:{"message":"Running initial layer identification..."}\n');
 if analysisTasks(4) == 1 % do the initial layer identification
     fileArray = run_extremalBdryID(fileArray,indexSet,outFileDirs.layers,initialLayerPar);
@@ -52,6 +64,7 @@ end;
 fprintf('STATUS:{"message":"Smoothing internal layers..."}\n');
 if analysisTasks(9) == 1 % 'smoothInternalLayers'
     fileArray = run_smoothInternalLayers(fileArray,indexSet,outFileDirs.layers,intLayerSmoothingPar);
+    % fileArray = run_trimInternalLayers(fileArray,indexSet);
 end;
 fprintf('STATUS:{"message":"Running CFAR process..."}\n');
 if analysisTasks(10) == 1 % 'CFARProcess'
@@ -61,9 +74,10 @@ fprintf('STATUS:{"message":"Running CFAR clustering..."}\n');
 if analysisTasks(11) == 1 % 'clusterCFARExceedances'
     fileArray = run_CFARClustering(fileArray,indexSet,outFileDirs.cfar,cfarClusterPar);
 end;
-fprintf('STATUS:{"message":"Running cluster features classifier..."}\n');
-
-run_clusterFeatures( fileArray, indexSet, outFileDirs.cfar );
+if analysisTasks(12) == 1 % calculate Cluster Features
+    fprintf('STATUS:{"message":"Running cluster evaluation..."}\n');
+    fileArray = runEvaluateClusters(fileArray,indexSet,outFileDirs.cff,evaluateClusterPar);
+end
 
 fprintf('STATUS:{"message":"Exporting results..."}\n');
 

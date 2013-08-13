@@ -75,7 +75,7 @@ end
 xstart = max(initx);
 xend = min(finalx);
 ystart = 1;
-yend = 128;
+[~,~,yend] = size(SAA);
 
 sspx = .1;
 sspy = .05; % spline smoothness parameter

@@ -27,6 +27,9 @@ class DoriwebTagLib {
 		out << "\" />";
 	}
 
+	/**
+	 * @attr type the type of icon to render (true, false, or null)
+	 */
 	def feedbackIcon = { attrs ->
 		def type = attrs.type;
 		if (type == null) {

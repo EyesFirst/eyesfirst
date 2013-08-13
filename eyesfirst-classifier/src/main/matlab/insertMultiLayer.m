@@ -40,7 +40,7 @@ for ii = 1:bb
         topPixInd(ii,jj) = ctPix+1;
       %  imfloor2(ii,jj) = imfloor(ii) - (Nlayers-jj)*minInterLayerDist(ii,jj);
 %         if jj > 1
-          imtop2(ii,jj) = imtop(ii)+ sum(minInterLayerDist(ii,1:jj));
+          imtop2(ii,jj) = max(1,imtop(ii)+ sum(minInterLayerDist(ii,1:jj)));
 %         elseif jj == 1
 %             imtop2(ii,jj) = imtop(ii);
 %         end;
@@ -195,6 +195,10 @@ csRelTop = cell(bb,Nlayers);
 for hh = 1:Nlayers
     for ii = 1:bb
         curCol = find(cmcs >= topPixInd(ii,hh) & cmcs <= basePixInd(ii,hh));
+        if isempty(curCol)
+            % Skip, I guess?
+            continue
+        end
         Bdry(ii,hh) = min(cmcs(curCol));
         BdryRelTop(ii,hh) = Bdry(ii,hh) - topPixInd(ii,hh) + 1;  % index relative to top pixel
         BdryRelIm(ii,hh) = BdryRelTop(ii,hh) + imtop2(ii,hh) - 1;    % index relative to the image dimensions

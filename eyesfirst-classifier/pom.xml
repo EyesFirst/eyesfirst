@@ -20,33 +20,55 @@ limitations under the License.
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.eyesfirst</groupId>
-	<artifactId>classifier-matlab</artifactId>
+
+	<parent>
+		<groupId>org.eyesfirst</groupId>
+		<artifactId>eyesfirst</artifactId>
+		<version>0.0.4-SNAPSHOT</version>
+		<relativePath>..</relativePath>
+	</parent>
+
+	<artifactId>eyesfirst-classifier-matlab</artifactId>
 	<packaging>jar</packaging>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>Classifier MATLAB</name>
+
+	<name>EyesFirst Classifier MATLAB</name>
+	<description>The MATLAB code for the EyesFirst classifier.</description>
+
 	<url>http://maven.apache.org</url>
-	<licenses>
-		<license>
-			<name>Apache 2</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-			<comments>A business-friendly OSS license</comments>
-		</license>
-	</licenses>
 	<build>
-		<finalName>${project.artifactId}-${project.version}</finalName>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
 				<executions>
 					<execution>
 						<id>compile</id>
 						<phase>compile</phase>
 						<configuration>
-							<tasks>
+							<target>
 								<ant antfile="${basedir}/build.xml"/>
-							</tasks>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>test</id>
+						<phase>process-test-classes</phase>
+						<configuration>
+							<!-- This is really stupid, but - we basically write
+							a .properties file to export the value from the
+							inner ANT script to ourself. As far as I can tell,
+							this is the only way to do this. -->
+							<target>
+								<property name="matlab.properties" value="${project.build.directory}/matlab.properties"/>
+								<ant antfile="${basedir}/find-matlab.xml" target="write-properties"/>
+								<property file="${matlab.properties}"/>
+							</target>
+							<!-- We need to export the matlab property -->
+							<exportAntProperties>true</exportAntProperties>
 						</configuration>
 						<goals>
 							<goal>run</goal>
@@ -54,13 +76,89 @@ limitations under the License.
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<classifier>${eyesfirst.currentPlatform}</classifier>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
+	<!-- Depending on platform, we need to set up the surefire plugin differently -->
+	<profiles>
+		<profile>
+			<id>osx</id>
+			<activation>
+				<os>
+					<name>Mac OS X</name>
+					<arch>x86_64</arch>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<environmentVariables>
+								<DYLD_LIBRARY_PATH>${matlab}/runtime/maci64:${matlab}/bin/maci64:${matlab}/sys/os/maci64</DYLD_LIBRARY_PATH>
+								<XAPPLRESDIR>${matlab}/X11/app-defaults</XAPPLRESDIR>
+							</environmentVariables>
+						</configuration>
+					</plugin>
+					<!-- Under Mac OS X, we also need to enforce that the JDK
+					is version 6 and not 7, due to MATLAB dependencies. -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-enforcer-plugin</artifactId>
+						<version>1.3</version>
+						<executions>
+							<execution>
+								<id>enforce-versions</id>
+								<goals>
+									<goal>enforce</goal>
+								</goals>
+								<configuration>
+									<rules>
+										<requireJavaVersion>
+											<version>[1.6,1.7)</version>
+										</requireJavaVersion>
+									</rules>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>linux</id>
+			<activation>
+				<os>
+					<family>linux</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<environmentVariables>
+								<LD_LIBRARY_PATH>${matlab}/runtime/glnxa64:${matlab}/bin/glnxa64:${matlab}/sys/os/glnxa64:${matlab}/sys/java/jre/glnxa64/jre/lib/amd64/native_threads:${matlab}/sys/java/jre/glnxa64/jre/lib/amd64/server:${matlab}/sys/java/jre/glnxa64/jre/lib/amd64</LD_LIBRARY_PATH>
+								<XAPPLRESDIR>${matlab}/X11/app-defaults</XAPPLRESDIR>
+							</environmentVariables>
+							<jvm>/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/bin/java</jvm>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-		<matlab.mcc>mcc</matlab.mcc>
-		<matlab.src.dir>${basedir}${file.separator}src${file.separator}main${file.separator}matlab</matlab.src.dir>
-		<matlab.dest.dir>${project.build.directory}${file.separator}org.mitre.eyesfirst.retinalthickness.classifier${file.separator}src</matlab.dest.dir>
 	</properties>
 	<dependencies>
 		<!--
@@ -74,7 +172,12 @@ limitations under the License.
 		<dependency>
 			<groupId>com.mathworks</groupId>
 			<artifactId>javabuilder</artifactId>
-			<version>7.16</version>
+			<version>[7.16,)</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

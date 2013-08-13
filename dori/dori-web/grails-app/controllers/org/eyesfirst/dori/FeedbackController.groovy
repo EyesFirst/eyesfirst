@@ -52,6 +52,8 @@ class FeedbackController {
 		feedback.setReviewer(springSecurityService.getCurrentUser())
 		feedback.setAffirmHardExudates(DiagnosisController.parseBoolean(request.getParameter("affirmHardExudates")))
 		feedback.setAffirmAbnormalRetinalThickness(DiagnosisController.parseBoolean(request.getParameter("affirmAbnormalRetinalThickness")))
+		feedback.setDiagnosis(request.getParameter("diagnosis"))
+		feedback.setPlan(request.getParameter("plan"))
 		feedback.setProcessedNotes(request.getParameter("processedNotes"))
 
 		image.addToFeedback(feedback)

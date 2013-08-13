@@ -52,7 +52,8 @@ import org.slf4j.LoggerFactory;
 	urlPatterns = { "/process/*" }
 )
 public class RunProcessServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
+	private static final String JSON_MIME_TYPE = "application/json; charset=UTF-8";
 	private final ProcessManager processManager = new ProcessManager(2);
 	private String wadoRoot;
 	private JsonFactory jsonFactory = new JsonFactory();
@@ -223,10 +224,11 @@ public class RunProcessServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String[] path = parseRequestPath(request);
+		String[] path = ServletUtil.parseRequestPath(request);
 		if (path.length == 0) {
 			// Show status
 			AbstractProcess[] pe = processManager.getProcesses();
+			response.setContentType(JSON_MIME_TYPE);
 			JsonGenerator json = jsonFactory.createJsonGenerator(response.getOutputStream(), JsonEncoding.UTF8);
 			json.writeStartObject();
 			json.writeFieldName("processes");
@@ -260,11 +262,12 @@ public class RunProcessServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String[] path = parseRequestPath(request);
+		String[] path = ServletUtil.parseRequestPath(request);
 		if (path.length == 1 && path[0].equals("start")) {
 			String studyUID = request.getParameter("studyUID");
 			String seriesUID = request.getParameter("seriesUID");
 			String objectUID = request.getParameter("objectUID");
+			String callbackKey = request.getParameter("key");
 			StringBuilder sb = new StringBuilder(wadoRoot);
 			if (sb.indexOf("?") >= 0)
 				sb.append('&');
@@ -282,9 +285,24 @@ public class RunProcessServlet extends HttpServlet {
 			}
 			// Create the output path.
 			File output = new File(outputPath, createHash(seriesUID, studyUID, objectUID));
+			if (request.getParameter("query") != null) {
+				// This indicates that, rather than start a new process, we
+				// are merely being queried about what that process would
+				// actually do.
+				response.setContentType(JSON_MIME_TYPE);
+				JsonGenerator json = jsonFactory.createJsonGenerator(response.getOutputStream());
+				json.writeStartObject();
+				json.writeFieldName("dataDirectory");
+				json.writeString(output.getAbsolutePath());
+				json.writeEndObject();
+				json.flush();
+				response.setStatus(HttpServletResponse.SC_OK);
+				return;
+			}
 			// Start a new process.
-			EyesFirstProcess efp = new EyesFirstProcess(sb.toString(), dicomURL, callbackURL, output, mcrPath, jarFiles);
+			EyesFirstProcess efp = new EyesFirstProcess(sb.toString(), dicomURL, callbackURL, callbackKey, output, mcrPath, jarFiles);
 			long uid = processManager.queueProcess(efp);
+			response.setContentType(JSON_MIME_TYPE);
 			JsonGenerator json = jsonFactory.createJsonGenerator(response.getOutputStream());
 			json.writeStartObject();
 			json.writeFieldName("uid");
@@ -299,6 +317,13 @@ public class RunProcessServlet extends HttpServlet {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 	}
 
+	/**
+	 * FIXME: This wants the fields in the wrong order! (Ooops)
+	 * @param seriesUID
+	 * @param studyUID
+	 * @param objectUID
+	 * @return
+	 */
 	public static String createHash(String seriesUID, String studyUID, String objectUID) {
 		if (seriesUID == null || studyUID == null || objectUID == null)
 			throw new NullPointerException();
@@ -314,37 +339,5 @@ public class RunProcessServlet extends HttpServlet {
 		} catch (UnsupportedEncodingException e) {
 			throw new Error("UTF-8 must be supported");
 		}
-	}
-
-	/**
-	 * Parses the request path, returning an array of strings that specify
-	 * each individual path component from the request.
-	 * @param request
-	 * @return
-	 */
-	private String[] parseRequestPath(HttpServletRequest request) {
-		// The request URI is just the path part of the HTTP request (minus
-		// the query string)
-		String path = request.getRequestURI();
-		// First, strip off the context path
-		String cp = request.getContextPath();
-		if (path.startsWith(cp)) {
-			path = path.substring(cp.length());
-		}
-		// Next, string off the servlet path
-		String sp = request.getServletPath();
-		if (path.startsWith(sp)) {
-			path = path.substring(sp.length());
-		}
-		if (path.length() == 0) {
-			// Empty string is perfectly OK here, since we may have been invoked
-			// directly.
-			return new String[0];
-		}
-		// Finally, if there's a / at the start, remove that
-		if (path.charAt(0) == '/') {
-			path = path.substring(1);
-		}
-		return path.split("/");
 	}
 }

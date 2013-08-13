@@ -1,90 +1,99 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
+
+<!--
+Copyright 2013 The MITRE Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Image Processor Admin Page</title>
-<link rel="stylesheet" type="text/css" href="../styles/ui-darkness/jquery-ui-1.8.16.custom.css">
-<link rel="stylesheet" type="text/css" href="../styles/admin.css">
-<script type="text/javascript" src="../scripts/jquery-1.7.1.min.js"></script>
-<script type="text/javascript" src="../scripts/jquery-ui-1.8.17.custom.min.js"></script>
-<script type="text/javascript" src="admin.js"></script>
-<script type="text/javascript"><!--
-$(function() {
-	new ProcessManager('#processes');
-	var form = $('#process-form');
-	var sumbitButton = $('#process-form input[type=submit]');
-	form.submit(function() {
-		// Submit the form using AJAX
-		try {
-			sumbitButton.prop('disable', true);
-			$.ajax({
-				url: form.attr('action'),
-				type: 'POST',
-				data: form.serialize(),
-				complete: function(jqXHR, textStatus) {
-					sumbitButton.prop('disable', false);
-				},
-				error: function(jqXHR, textStatus, errorThrown) {
-					alert("Server responded with an error:")
-				},
-				success: function(data, textStatus, jqXHR) {
-					// TODO: Notify?
-				}
-			});
-		} catch (ex) {
-			alert("An error occurred sending the form: " + ex);
-		}
-		return false;
-	});
-});
-//--></script>
-</head>
-<body>
-<h1>Image Processor Admin</h1>
-<h2>Processes</h2>
-<div id="processes">
-<noscript>JavaScript is required to display the list of running processes.
-Please enable JavaScript in your browser, and then reload this page.</noscript>
-</div>
-<div id="run-process">
-<h2>Start a Process</h2>
-<form id="process-form" name="process" method="POST" action="../process/start">
-<script type="text/javascript"><!--
-function parseURL(url) {
-	var studyId = null, seriesId = null, objectId = null;
-	var re = /([^\?;&=]+)=([^;&]*)/g;
-	var m;
-	while (m = re.exec(url)) {
-		try {
-			if (m[1] == 'studyUID')
-				studyId = decodeURIComponent(m[2]);
-			if (m[1] == 'seriesUID')
-				seriesId = decodeURIComponent(m[2]);
-			if (m[1] == 'objectUID')
-				objectId = decodeURIComponent(m[2]);
-		} catch (e) {
-			// Ignore, it's most likely a bad URI component
-		}
-	}
-	if (studyId) {
-		document.forms.process.studyUID.value = studyId;
-	}
-	if (seriesId) {
-		document.forms.process.seriesUID.value = seriesId;
-	}
-	if (objectId) {
-		document.forms.process.objectUID.value = objectId;
-	}
-}
-document.writeln('<p>Paste an existing DICOM URL into this text area to automatically populate the fields below:</p><textarea name="all" onchange="parseURL(this.value)" onkeyup="parseURL(this.value)" rows="4" cols="80"></textarea><br>');
-// --></script>
-<table>
-<tr><th>Study ID:</th><td><input type="text" name="studyUID" size="80"></td></tr>
-<tr><th>Series ID:</th><td><input type="text" name="seriesUID" size="80"></td></tr>
-<tr><th>Object ID:</th><td><input type="text" name="objectUID" size="80"></td></tr>
-<tr><td></td><td><input type="submit" value="Start Process"></td></tr>
-</table>
-</form>
-</div>
-</body>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Image Processor Admin Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="../styles/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="../styles/bootstrap-responsive.min.css">
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <style type="text/css">
+  td.process-status { whitespace: preserve; }
+  </style>
+ </head>
+ <body>
+  <div class="container-fluid">
+   <h1>Image Processor Admin</h1>
+   <h2>Processes</h2>
+   <div id="processes">
+    <noscript>JavaScript is required to display the list of running processes.
+    Please enable JavaScript in your browser, and then reload this page.</noscript>
+   </div>
+   <div id="run-process">
+    <h2>Start a Process</h2>
+    <form id="process-form" class="form-horizontal" name="process" method="POST" action="../process/start">
+     <div class="control-group" id="fullURL" style="display: none;">
+      <label class="control-label" for="fullURL">DICOM URL</label>
+      <div class="controls">
+       <textarea class="input-xxlarge" name="all" onchange="parseDicomURL(this.value)" onkeyup="parseDicomURL(this.value)" rows="4"></textarea>
+      <span class="help-block">Paste an existing DICOM URL into this text area to automatically populate the fields below.</span>
+      </div>
+     </div>
+     <div class="control-group">
+      <label class="control-label" for="studyUID">Study UID</label>
+      <div class="controls">
+       <input class="input-xxlarge" type="text" id="studyUID" name="studyUID" placeholder="Study UID">
+      </div>
+     </div>
+     <div class="control-group">
+      <label class="control-label" for="seriesUID">Series UID</label>
+      <div class="controls">
+       <input class="input-xxlarge" type="text" id="seriesUID" name="seriesUID" placeholder="Series UID">
+      </div>
+     </div>
+     <div class="control-group">
+      <label class="control-label" for="objectUID">Object UID</label>
+      <div class="controls">
+       <input class="input-xxlarge" type="text" id="objectUID" name="objectUID" placeholder="Object UID">
+      </div>
+     </div>
+     <div class="control-group">
+      <label class="control-label" for="key">Key</label>
+      <div class="controls">
+       <input class="input-large" type="text" id="key" name="key" placeholder="Key">
+       <span class="help-inline">(Optional) Key to send to the callback</span>
+      </div>
+     </div>
+     <div class="control-group">
+      <div class="controls">
+       <button type="submit" id="processSubmitButton" class="btn">Start Process</button>
+      </div>
+     </div>
+     <div class="control-group">
+      <div class="controls">
+       <button type="submit" id="processQueryButton" name="query" value="yes" class="btn">Lookup Data Directory</button>
+      </div>
+     </div>
+    </form>
+   </div>
+   <hr>
+   <footer>
+    Status icons are part of <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>
+    and are from <a href="http://glyphicons.com/">Glyphicons</a>.
+   </footer>
+  </div>
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script type="text/javascript" src="../scripts/jquery-1.7.2.min.js"></script>
+  <script type="text/javascript" src="../scripts/bootstrap.min.js"></script>
+  <script type="text/javascript" src="admin.js"></script>
+ </body>
 </html>

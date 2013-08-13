@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-Copyright 2012 The MITRE Corporation
+Copyright 2012, 2013 The MITRE Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,13 +21,21 @@ Maven, so instead, this little ANT script deals with that on its own. -->
 <project name="Image Classifier MATLAB Compiler" default="compile">
 	<property environment="env"/>
 	<property name="matlab.src.dir" value="src/main/matlab"/>
-	<property name="matlab.dest.dir" value="target${file.separator}org.mitre.eyesfirst.retinalthickness.classifier${file.separator}src"/>
+	<!-- Note: this path needs to be relative, which is why it uses
+	${file.separator} to build the path instead of location (which produces an
+	absolute path) -->
+	<property name="matlab.dest.dir" value="target${file.separator}org.mitre.eyesfirst.classifierml${file.separator}src"/>
 	<property name="project.build.directory" value="target"/>
+	<!-- These files are currently not included with the open source
+	distribution. They contain data used to calculate probabilities of detection
+	and false alarm based on current training data. -->
+	<!--
 	<property name="training.data" value="${matlab.src.dir}/trainingStatsHighQuality.mat"/>
 	<property name="performance.data" value="${matlab.src.dir}/thicknessPerformanceSplines.mat"/>
 	<property name="he.stats.data" value="${matlab.src.dir}/trainingStats_ppl_2.mat"/>
 	<property name="he.splines.data" value="${matlab.src.dir}/HESplineFile.mat"/>
 	<property name="normal.percent.data" value="${matlab.src.dir}/normalTrainingPercentilesstatInd_1.mat"/>
+	-->
 
 	<import file="find-matlab.xml"/>
 
@@ -81,8 +89,12 @@ Maven, so instead, this little ANT script deals with that on its own. -->
 				</exec>
 			</sequential>
 		</macrodef>
-		<available property="matlab.mcc.available" file="${matlab.mcc}"/>
-		<available property="matlab.mcc.available" file="${matlab.mcc}.bat"/>
+		<condition property="matlab.mcc.available">
+			<or>
+				<available file="${matlab.mcc}"/>
+				<available file="${matlab.mcc}.bat"/>
+			</or>
+		</condition>
 	</target>
 
 	<target name="-init-mcc" depends="-init-mcc-unix,-init-mcc-windows" unless="matlab.mcc.available">
@@ -95,7 +107,7 @@ Otherwise, please add your MATLAB bin directory to the path.</echo>
 
 	<target name="-check-needed">
 		<!-- See if there's anything to do. -->
-		<uptodate property=".matlab.uptodate" targetfile="${matlab.dest.dir}/classifier.jar">
+		<uptodate property=".matlab.uptodate" targetfile="${matlab.dest.dir}/classifierml.jar">
 			<srcfiles dir="src/main/matlab" includes="**/*.m"/>
 		</uptodate>
 	</target>
@@ -106,8 +118,9 @@ Otherwise, please add your MATLAB bin directory to the path.</echo>
 		do this too. -->
 		<delete dir="${matlab.dest.dir}"/>
 		<mkdir dir="${matlab.dest.dir}"/>
-		<property name="matlab.call_thickness_classifier.m" location="${matlab.src.dir}/call_thickness_classifier.m"/>
-		<mcc dir="${matlab.src.dir}" wrapper="java:org.mitre.eyesfirst.retinalthickness.classifier,RetinalThickessClassifier">
+		<property name="matlab.call_eyesfirst_classifier.m" location="${matlab.src.dir}/call_eyesfirst_classifier.m"/>
+		<property name="matlab.run_unit_tests.m" location="${matlab.src.dir}/run_unit_tests.m"/>
+		<mcc dir="${matlab.src.dir}" wrapper="java:org.mitre.eyesfirst.classifierml,EyesFirstMLClassifier">
 			<arg value="-T"/>
 			<arg value="link:lib"/>
 			<arg value="-d"/>
@@ -123,7 +136,7 @@ Otherwise, please add your MATLAB bin directory to the path.</echo>
 			<arg value="-w"/>
 			<arg value="enable:demo_license"/>
 			<arg value="-v"/>
-			<arg value="class{RetinalThickessClassifier:${matlab.call_thickness_classifier.m}}"/>
+<!--
 			<arg value="-a"/>
 			<arg file="${training.data}"/>
 			<arg value="-a"/>
@@ -134,6 +147,9 @@ Otherwise, please add your MATLAB bin directory to the path.</echo>
 			<arg file="${he.splines.data}"/>
 			<arg value="-a"/>
 			<arg file="${normal.percent.data}"/>
+-->
+			<arg value="class{EyesFirstMLClassifier:${matlab.call_eyesfirst_classifier.m}}"/>
+			<arg value="class{EyesFirstMLClassifier:${matlab.run_unit_tests.m}}"/>
 		</mcc>
 		<mkdir dir="${project.build.directory}/classes"/>
 		<copy todir="${project.build.directory}/classes">

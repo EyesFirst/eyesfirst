@@ -32,7 +32,7 @@ acovinv=U*diag(invteigval)*U';
 whitemat=diag(sqrt(invteigval))*U';
 wdm=whitemat*(dm-repmat(curclmean,1,nobs));
 if nbds > 1
-   qf=sum(wdm.^2);
+    qf=sum(wdm.^2);
 else
     qf = wdm.^2;
 end;

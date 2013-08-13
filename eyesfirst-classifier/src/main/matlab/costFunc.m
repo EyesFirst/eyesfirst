@@ -16,7 +16,7 @@ function [cc,gg] = costFunc(aa,xv,yv,costFuncFlag,C0)
 % costFunc(aa,xv,yv,costFuncFlag,C0)
 if costFuncFlag == 2
    cc = sum((polyval(aa,xv)-yv).^2);
-   dv = 2*polyval(aa,xv)-yv;
+   dv = 2*(polyval(aa,xv)-yv);
    pmat = repmat(xv,1,length(aa));
   for ii = 1:length(aa)
       pmat(:,ii) = pmat(:,ii).^(length(aa)-ii);

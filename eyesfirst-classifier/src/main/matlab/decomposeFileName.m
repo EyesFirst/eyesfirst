@@ -42,5 +42,4 @@ else
         fileSuffix = fileSuffixWmat(1:matPos-1);
     end;
 end;
-   
 

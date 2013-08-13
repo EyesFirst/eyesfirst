@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2013 The MITRE Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.eyesfirst</groupId>
+	<artifactId>eyesfirst</artifactId>
+	<packaging>pom</packaging>
+	<version>0.0.4-SNAPSHOT</version>
+
+	<name>EyesFirst</name>
+	<description>The master build POM for the various EyesFirst subprojects.</description>
+	<url>http://www.eyesfirst.org/</url>
+	<properties>
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+	</properties>
+
+	<build>
+		<plugins>
+			<!-- Copy the README.txt file into src/site/README.md in the site
+			source so it can be included in the site generation. You'd think
+			there'd be some way to automate this as the README probably would be
+			useful in the site too, but no, there doesn't seem to be any better
+			way to do this. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<id>site</id>
+						<phase>pre-site</phase>
+						<inherited>false</inherited>
+						<configuration>
+							<target>
+								<mkdir dir="${basedir}/src/site/markdown"/>
+								<copy file="${basedir}/README.txt" tofile="${basedir}/src/site/markdown/README.md"/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!-- Define some default versions of plugins for the project -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.1</version>
+					<configuration>
+						<!-- http://maven.apache.org/plugins/maven-compiler-plugin/ -->
+						<source>1.6</source>
+						<target>1.6</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.15</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-report-plugin</artifactId>
+					<version>2.15</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>2.5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.8</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.3</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.doxia</groupId>
+							<artifactId>doxia-module-markdown</artifactId>
+							<version>1.4</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<modules>
+		<module>eyesfirst-common</module>
+		<module>eyesfirst-classifier</module>
+		<module>image-processor/eyesfirst-classifier-runner</module>
+		<module>image-processor/image-processor-webapp</module>
+	</modules>
+
+	<profiles>
+		<profile>
+			<id>win32</id>
+			<activation>
+				<os>
+					<family>windows</family>
+					<arch>x86</arch>
+				</os>
+			</activation>
+			<properties>
+				<eyesfirst.currentPlatform>win32</eyesfirst.currentPlatform>
+			</properties>
+		</profile>
+		<profile>
+			<id>win64</id>
+			<activation>
+				<os>
+					<family>windows</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<eyesfirst.currentPlatform>win64</eyesfirst.currentPlatform>
+			</properties>
+		</profile>
+		<profile>
+			<id>osx</id>
+			<activation>
+				<os>
+					<name>Mac OS X</name>
+					<arch>x86_64</arch>
+				</os>
+			</activation>
+			<properties>
+				<eyesfirst.currentPlatform>osx</eyesfirst.currentPlatform>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux</id>
+			<activation>
+				<os>
+					<family>linux</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<eyesfirst.currentPlatform>linux-amd64</eyesfirst.currentPlatform>
+			</properties>
+		</profile>
+	</profiles>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.10</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+</project>

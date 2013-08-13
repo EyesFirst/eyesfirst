@@ -1,4 +1,4 @@
-// $Id: AbstractManager.js 175 2011-09-16 21:35:56Z dsmiley $
+// $Id: AbstractManager.js 435 2013-07-10 19:45:18Z dpotter $
 
 /**
  * The Manager acts as the controller in a Model-View-Controller framework. All
@@ -32,7 +32,8 @@ AjaxSolr.AbstractManager = AjaxSolr.Class.extend(
   proxyUrl: null,
 
   /**
-   * The default Solr servlet.
+   * The default Solr servlet. You may prepend the servlet with a core if using
+   * multiple cores.
    *
    * @field
    * @public
@@ -174,19 +175,9 @@ AjaxSolr.AbstractManager = AjaxSolr.Class.extend(
    */
   handleResponse: function (data) {
     this.response = data;
-    if (!data.responseHeader.params) {//echoParams=none
-        data.responseHeader.params = {};
-    }
+
     for (var widgetId in this.widgets) {
-      try {
-        this.widgets[widgetId].afterRequest();
-      } catch(e) {
-        //TODO Before this catch logic was here, no errors were reported. Why not?
-        //TODO What is the logging best practice?
-        if (console.error)
-          console.error('Error during '+widgetId+'.afterRequest()',e);
-        //throw e;
-      }
+      this.widgets[widgetId].afterRequest();
     }
   }
 });

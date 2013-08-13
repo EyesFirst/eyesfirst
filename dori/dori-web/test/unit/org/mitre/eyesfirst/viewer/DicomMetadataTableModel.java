@@ -26,7 +26,7 @@ import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.SpecificCharacterSet;
 import org.dcm4che2.data.Tag;
 import org.dcm4che2.data.VR;
-import org.mitre.eyesfirst.viewer.web.TagNameUtil;
+import org.mitre.eyesfirst.dicom.TagNameUtil;
 
 public class DicomMetadataTableModel extends AbstractTableModel {
 	/**

@@ -336,11 +336,16 @@
    <field name="pat_id" type="string"           required="true"/>
    <field name="pat_id_issuer" type="string" />
    <field name="pat_name" type="text" />
-   <field name="pat_birthdate" type="date" /><!-- year granularity -->
+   <field name="pat_birthdate" type="string" /><!--
+   Due to bad data in one of the current DICOM files, this is just a string for now.
+   <field name="pat_birthdate" type="date" />--><!-- year granularity -->
    <field name="pat_gender" type="string" default="O"/>
    <field name="efid_issuer_name" type="string"/>
    <field name="efid" type="string"/>
    <field name="processed_query_string" type="string" />
+   <field name="notes" type="string"/>
+   <field name="processed_notes" type="string"/>
+   <field name="dori_id" type="int"/>
    
 
    <!-- Dynamic field definitions.  If a field name is not found, dynamicFields

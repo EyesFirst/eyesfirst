@@ -84,3 +84,5 @@ SOLR
 
 The Solr configuration is in the "solr" directory. Essentially you should be
 able to point your Solr home to be the "solr/solr" directory and it should work.
+
+The current tested version is SOLR 3.5.0.

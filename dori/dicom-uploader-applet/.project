@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>DICOM Uploader Applet</name>
+	<name>uploader-applet</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -17,8 +17,18 @@
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>org.eclipse.jdt.groovy.core.groovyNature</nature>
 		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<filteredResources>
+		<filter>
+			<id>1346089652540</id>
+			<name></name>
+			<type>26</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-true-false-.svn</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
 </projectDescription>

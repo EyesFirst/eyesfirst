@@ -1,4 +1,4 @@
-// $Id: AbstractWidget.js 302 2012-04-03 22:24:18Z dpotter $
+// $Id: AbstractWidget.js 435 2013-07-10 19:45:18Z dpotter $
 
 /**
  * Baseclass for all widgets. 
@@ -41,6 +41,27 @@ AjaxSolr.AbstractWidget = AjaxSolr.Class.extend(
   manager: null,
 
   /**
+   * The offset parameter. Set this field to make the widget reset the offset
+   * parameter to the given value on each request.
+   *
+   * @field
+   * @public
+   * @type Number
+   */
+  start: undefined,
+
+  /**
+   * The Solr servlet for this widget. You may prepend the servlet with a core
+   * if using multiple cores. If none is set, it will default to the manager's
+   * servlet.
+   *
+   * @field
+   * @public
+   * @type String
+   */
+  servlet: undefined,
+
+  /**
    * An abstract hook for child implementations.
    *
    * <p>This method should do any necessary one-time initializations.</p>
@@ -59,5 +80,15 @@ AjaxSolr.AbstractWidget = AjaxSolr.Class.extend(
    *
    * <p>This method is executed after the Solr response is received.</p>
    */
-  afterRequest: function () {}
+  afterRequest: function () {},
+
+  /**
+   * A proxy to the manager's doRequest method.
+   *
+   * @param {Boolean} [start] The Solr start offset parameter.
+   * @param {String} [servlet] The Solr servlet to send the request to.
+   */
+  doRequest: function (start, servlet) {
+    this.manager.doRequest(start || this.start, servlet || this.servlet);
+  }
 });

@@ -17,7 +17,7 @@ function [fileArray] = appendFile(fileArray,filePrefix,fileSuffix,fileDir)
 foundBase = 0;
 Nbases = length(fileArray);
 ctBases = 1;
-% fileTypes = {'.dcm','_mat.mat','_SAA.mat','_gate.mat','_Layers1.mat','_Layers1_smooth2d.mat', '_thicknessMaps.mat','_thicknessStats.mat','_cfar.mat','_cfar_exceedClust.mat','_cfar_exceedClust_moments.mat','intLayers.mat','_intLayers_smooth2d.mat'};
+% fileTypes = {'.dcm','_mat.mat','_SAA.mat','_gate.mat','_Layers1.mat','_Layers1_smooth2d.mat', '_thicknessMaps.mat','_thicknessStats.mat','_cfar.mat','_cfar_exceedClust.mat','_cfar_clusterFeatures.mat','intLayers.mat','_intLayers_smooth2d.mat','heViz.ps'};
 if strcmp(fileSuffix,'.dcm')
     % check for existing ones and append a new one if it is not there, also
     % check for duplicate file names in different directories
@@ -69,15 +69,18 @@ if strcmp(fileSuffix,'.dcm')
         fileArray{Nbases+1}.cfarCluster.name   = []; % cfar cluster file
         fileArray{Nbases+1}.cfarCluster.dir = [];
         fileArray{Nbases+1}.cfarCluster.multiples = [];
-        fileArray{Nbases+1}.cfarClusterMoments.name   = []; % moments of cfar clusters
-        fileArray{Nbases+1}.cfarClusterMoments.dir = [];
-        fileArray{Nbases+1}.cfarClusterMoments.multiples = [];
+        fileArray{Nbases+1}.cfarClusterFeatures.name   = []; % moments of cfar clusters
+        fileArray{Nbases+1}.cfarClusterFeatures.dir = [];
+        fileArray{Nbases+1}.cfarClusterFeatures.multiples = [];
         fileArray{Nbases+1}.thicknessStats.name  = [];     % thickness statistics
         fileArray{Nbases+1}.thicknessStats.dir = [];
         fileArray{Nbases+1}.thicknessStats.multiples = [];
         fileArray{Nbases+1}.thicknessMaps.name  = [];    % thicknessMaps
         fileArray{Nbases+1}.thicknessMaps.dir = [];
         fileArray{Nbases+1}.thicknessMaps.multiples  = [];
+        fileArray{Nbases+1}.heViz.name  = [];    % HE image file
+        fileArray{Nbases+1}.heViz.dir = [];
+        fileArray{Nbases+1}.heViz.multiples  = [];
     end;
 else
     while ctBases <= Nbases && foundBase == 0
@@ -183,15 +186,15 @@ else
                         fileArray{ctBases}.cfarCluster.multiples = 1;
                     end;
                 end;
-            elseif strcmp(fileSuffix,'_cfar_exceedClust_moments')
+            elseif strcmp(fileSuffix,'_cfar_clusterFeatures.mat')
                 %check to see if already assigned
-                if isempty(fileArray{ctBases}.cfarClusterMoments.name)
-                    fileArray{ctBases}.cfarClusterMoments.name = [curBaseName,'_cfar_exceedClust_moments'];
-                    fileArray{ctBases}.cfarClusterMoments.dir = fileDir;
-                    fileArray{ctBases}.cfarClusterMoments.multiples = 0;
+                if isempty(fileArray{ctBases}.cfarClusterFeatures.name)
+                    fileArray{ctBases}.cfarClusterFeatures.name = [curBaseName,'_cfar_clusterFeatures'];
+                    fileArray{ctBases}.cfarClusterFeatures.dir = fileDir;
+                    fileArray{ctBases}.cfarClusterFeatures.multiples = 0;
                 else
-                    if ~strcmp(fileArray{ctBases}.cfarClusterMoments.dir,fileDir)
-                        fileArray{ctBases}.cfarClusterMoments.multiples = 1;
+                    if ~strcmp(fileArray{ctBases}.cfarClusterFeatures.dir,fileDir)
+                        fileArray{ctBases}.cfarClusterFeatures.multiples = 1;
                     end;
                 end;
             elseif strcmp(fileSuffix,'_intLayers')
@@ -201,8 +204,8 @@ else
                     fileArray{ctBases}.intLayers.dir = fileDir;
                     fileArray{ctBases}.intLayers.multiples = 0;
                 else
-                    if ~strcmp(fileArray{ctBases}.intLayer.dir,fileDir)
-                        fileArray{ctBases}.intLayer.multiples = 1;
+                    if ~strcmp(fileArray{ctBases}.intLayers.dir,fileDir)
+                        fileArray{ctBases}.intLayers.multiples = 1;
                     end;
                 end;
                 
@@ -252,9 +255,9 @@ else
 % fileArray{ii}.cfarCluster.name   % cfar cluster file
 % fileArray{ii}.cfarCluster.dir
 % fileArray{ii}.cfarCluster.multiples
-% fileArray{ii}.cfarClusterMoments.name   % moments of cfar clusters
-% fileArray{ii}.cfarClusterMoments.dir
-% fileArray{ii}.cfarClusterMoments.multiples
+% fileArray{ii}.cfarClusterFeatures.name   % moments of cfar clusters
+% fileArray{ii}.cfarClusterFeatuers.dir
+% fileArray{ii}.cfarClusterFeatures.multiples
 % fileArray{ii}.thicknessStats.name      % thickness statistics
 % fileArray{ii}.thicknessStats.dir
 % fileArray{ii}.thicknessStats.multiples

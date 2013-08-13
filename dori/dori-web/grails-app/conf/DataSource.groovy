@@ -40,31 +40,6 @@ environments {
 		}
 	}
 	test { dataSource { } }
-	/*    production {
-	 dataSource {
-	 jndiName = "java:comp/env/jdbc"
-	 dialect = ""
-	 pooled = false
-	 }
-	 }*/
-	demo {
-		dataSource {
-			dbCreate = "update"
-			driverClassName = "com.mysql.jdbc.Driver"
-			dialect = "org.hibernate.dialect.MySQL5InnoDBDialect"
-			url = "jdbc:mysql://localhost:3306/doriweb"
-			pooled = true
-			properties {
-				maxActive = 50
-				maxIdle = 25
-				minIdle = 5
-				initialSize = 5
-				minEvictableIdleTimeMillis = 1800000
-				timeBetweenEvictionRunsMillis = 1800000
-				maxWait = 10000
-			}
-		}
-	}
 	production {
 		dataSource {
 			dbCreate = "update"

@@ -39,6 +39,16 @@ class RegisterController extends grails.plugins.springsecurity.ui.RegisterContro
 		if (!user.validate() || !user.save()) {
 			// TODO
 		}
+		// Also set the EFID issuer
+		// FIXME: Set the EFID issuer in a more sane fashion. For now, the
+		// one that's used is hard-coded in the Grails configuration.
+		def issuerName = grails.util.GrailsConfig['eyesfirst.springsecurity.ui.register.defaultEfidIssuer']
+		def issuer = EfidIssuer.findByName(issuerName)
+		if (issuer == null) {
+			log.warn("No EFID issuer named $issuerName, creating a new one!")
+			issuer = new EfidIssuer([name: issuerName]).save()
+		}
+		user.efidIssuer = issuer
 
 		def registrationCode = new RegistrationCode(username: user.username).save()
 		String url = generateLink('verifyRegistration', [t: registrationCode.token])

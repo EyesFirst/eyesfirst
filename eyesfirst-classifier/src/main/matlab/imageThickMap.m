@@ -12,10 +12,9 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-function imageThickMap(fileDir,statFile,mapFile,ofile)
+function imageThickMap(fileDir,statFile,mapFile,ofile,pixelDim)
 % creates an image of the thickness map superimposes the polar sectors
 % and the mean values of each sector.  The output image is stored in ofile.
-leftShift = 20;
 stats = load([fileDir,filesep,statFile]);
 maps = load([fileDir,filesep,mapFile]);
 
@@ -27,8 +26,8 @@ cp = stats.thicknessFeatures.cp;
 boundaryCurves.radii = [500 1500 3000];
 boundaryCurves.rays = [pi/4 3*pi/4 -3*pi/4, -pi/4];
 imageDim = size(thickMapAve);
-di = 46.875; % microns per pixel slow time 
-dj = 11.7188; % microns per pixel fast time
+di = pixelDim.slowTime; % microns per pixel slow time 
+dj = pixelDim.fastTime; % microns per pixel fast time
 bdryIm = polarSectorBoundaries(cp,boundaryCurves,imageDim,di,dj);
 [I,J] = find(bdryIm);
 maxTMA = max(max(thickMapAve));
@@ -52,13 +51,23 @@ set(gca,'units','normalized','position',[0 0 1 1]); % set the axes units to pixe
 set(gcf,'PaperUnits','inches','PaperPosition',[0 0 4 4])
  %text(250,50,'ABC','color','w','fontsize',18)
 Nregions = numel(stats.thicknessFeatures.stats);
+
+% Font size to use
+fontSize = 18;
+
 for ii = 1:Nregions-1
     meanI = round(mean(stats.thicknessFeatures.stats{ii}.I));
     meanJ = round(mean(stats.thicknessFeatures.stats{ii}.J));
     meanVal = int2str(round(mean(stats.thicknessFeatures.stats{ii}.meanThickAve)));
     % Draw a little text shadow to make things easier to see
-    text(meanJ-leftShift+(2/w*imageDim(2)),meanI+(2/w*imageDim(1)),meanVal,'color','k','fontsize',22);
+    shadow = text(meanJ,meanI,meanVal,'color','k','fontsize',fontSize,'HorizontalAlignment','center','VerticalAlignment','middle');
     % Then draw the actual text
-    text(meanJ-leftShift,meanI,meanVal,'color','w','fontsize',22);
+    mainText = text(meanJ,meanI,meanVal,'color','w','fontsize',fontSize,'HorizontalAlignment','center','VerticalAlignment','middle');
+    % Move the shadow based on the position of the main text
+    set(mainText, 'units', 'pixels');
+    p = get(mainText, 'position');
+    p = p + [2, -2, 0];
+    set(shadow, 'units', 'pixels');
+    set(shadow, 'position', p);
 end;
 print(gcf, ofile, '-dpng', '-r100');

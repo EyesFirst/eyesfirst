@@ -18,7 +18,7 @@ Nlayers = initialLayerPar.Nlayers;
 maxBdrySlope = initialLayerPar.maxBdrySlope;
 maxInterLayerDist = initialLayerPar.maxInterLayerDist;
 minInterLayerDist = initialLayerPar.minInterLayerDist;
-sliceRange = initialLayerPar.sliceRange
+sliceRange = initialLayerPar.sliceRange;
 costFigH = initialLayerPar.costFig;
 layerFigH = initialLayerPar.layerFig;
 clf(costFigH);
@@ -40,6 +40,7 @@ for ii = 1:Nfiles
             if isempty(curSAAFile) || isempty(curGateFile)
                 error('need to create the SAA and gate files first\n');
             else
+                load([fileArray{indexSet(ii)}.mat.dir, filesep, fileArray{indexSet(ii)}.mat.name], 'pixelDim');
                 load(curCompSAAFile)
                 load(curCompGateFile);
                 % create the output file name
@@ -59,12 +60,29 @@ for ii = 1:Nfiles
                     fileArray{indexSet(ii)}.layers1.multiples = 0;
                 end
                 if isempty(sliceRange)
-                    [aa,bb,lastSlice] = size(SAA);
+                    [~,~,lastSlice] = size(SAA);
                     firstSlice = 1;
                 else
                     firstSlice = sliceRange(1);
                     lastSlice = sliceRange(2);
                 end;
+                % The slope currently set is based on the "default" image
+                % size of 512x1024. So first, "convert" it to a "square"
+                % image...
+                disp(initialLayerPar.maxBdrySlope);
+                maxBdrySlope = initialLayerPar.maxBdrySlope / 2;
+                maxInterLayerDist = initialLayerPar.maxInterLayerDist / 2;
+                minInterLayerDist = initialLayerPar.minInterLayerDist / 2;
+                % And then, correct for the current image size.
+                aspectRatio = size(SAA,1) / size(SAA,2);
+                maxBdrySlope = floor(maxBdrySlope * aspectRatio);
+                maxInterLayerDist = floor(maxInterLayerDist * aspectRatio);
+                minInterLayerDist = floor(minInterLayerDist * aspectRatio);
+                % Note that maxBdrySlope is a vector, and each slope
+                % appears to be the value for the individual layer it's
+                % being used for. So applying the correction to all
+                % elements in the vector is, in fact, correct.
+                disp(maxBdrySlope);
                 cc = lastSlice-firstSlice+1;
                 fprintf('estimating layers\n')
                 stLayerBdrys = cell(cc,1);
@@ -75,7 +93,7 @@ for ii = 1:Nfiles
                     curim = squeeze(SAA(:,:,rr));
                     imtop = floor(polyGate{rr}.extrapLower);
                     imfloor = ceil(polyGate{rr}.extrapUpper);
-                    [BdryRelIm,rowOffSet,colOffSet,oimwla,thicknessProf12,thicknessProf13,intensityProf12,intensityProf13,intensityProf1B] = identifyLayers2D_wrd_kim(curim,imtop,imfloor,Nlayers,maxBdrySlope,maxInterLayerDist,minInterLayerDist,costFigH,layerFigH,dfstd,ksf);
+                    [BdryRelIm,rowOffSet,colOffSet,oimwla,thicknessProf12,thicknessProf13,intensityProf12,intensityProf13,intensityProf1B] = identifyLayers2D_wrd_kim(curim,imtop,imfloor,Nlayers,maxBdrySlope,maxInterLayerDist,minInterLayerDist,costFigH,layerFigH,dfstd,ksf,pixelDim,rr);
                     stLayerBdrys{ct2cc}.BdryRelIm = BdryRelIm;
                     stLayerBdrys{ct2cc}.rowOffSet = rowOffSet;
                     stLayerBdrys{ct2cc}.colOffSet = colOffSet;

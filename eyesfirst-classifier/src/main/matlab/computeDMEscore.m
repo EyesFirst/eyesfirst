@@ -57,7 +57,12 @@ jointAnomStat = sum(cjsm.*(jointStats9.covm\cjsm));
 % (Specificity,Sensitivity) based on test data from 2011.
 
 cpfa = ppval(pp_Pfa_Vs_Score,jointAnomStat);
-cpd = ppval(pp_Pd_Vs_Score,jointAnomStat);
+if cpfa >= 0
+   cpd = ppval(pp_Pd_Vs_Score,jointAnomStat);
+else
+    cpfa = 0;
+    cpd = ppval(pp_Pd_Vs_Pfa,0);
+end
 performancePoint.pfa = cpfa;
 performancePoint.pd = cpd;
 performancePoint.specificity = 1-cpfa;

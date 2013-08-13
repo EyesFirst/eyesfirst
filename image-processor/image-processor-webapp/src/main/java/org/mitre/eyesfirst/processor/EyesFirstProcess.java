@@ -16,6 +16,8 @@
 package org.mitre.eyesfirst.processor;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
+import org.mitre.eyesfirst.dicom.DicomID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,14 +34,21 @@ import org.slf4j.LoggerFactory;
  * @author dpotter
  */
 public class EyesFirstProcess extends JavaProcess {
-	private final Logger log = LoggerFactory.getLogger(getClass());
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7222488527676729409L;
+	private Logger log = LoggerFactory.getLogger(getClass());
+	private String name = "EyesFirst";
 	private String wadoURL;
 	private String callbackURL;
+	private String callbackKey;
 	private String mcrPath;
 	private String dicomURL;
 	private File[] jarFiles = null;
 	private File outputPath;
 	private ConsoleInputHelper stdout = new ConsoleInputHelper();
+	private ConsoleInputHelper stderr = new ConsoleInputHelper();
 	private AtomicReference<String> statusString = new AtomicReference<String>();
 	private JsonFactory jsonFactory = new JsonFactory();
 
@@ -58,6 +68,8 @@ public class EyesFirstProcess extends JavaProcess {
 	 *            the {@code dcmsnd} URL to send the resulting DICOM to
 	 * @param callbackURL
 	 *            the URL to send the processing result to
+	 * @param callbackKey
+	 *            a key used to inform the callback which process has completed
 	 * @param outputPath
 	 *            the path to store the output too
 	 * @param mcrPath
@@ -66,11 +78,12 @@ public class EyesFirstProcess extends JavaProcess {
 	 *            paths to include on the classpath, note that they're just
 	 *            added to the classpath as-is
 	 */
-	public EyesFirstProcess(String wadoURL, String dicomURL, String callbackURL, File outputPath, String mcrPath, File[] jarFiles) {
+	public EyesFirstProcess(String wadoURL, String dicomURL, String callbackURL, String callbackKey, File outputPath, String mcrPath, File[] jarFiles) {
 		if (wadoURL == null)
 			throw new NullPointerException();
-		this.wadoURL = wadoURL;
+		setWadoURL(wadoURL);
 		this.callbackURL = callbackURL;
+		this.callbackKey = callbackKey;
 		this.dicomURL = dicomURL;
 		this.outputPath = outputPath;
 		this.mcrPath = mcrPath;
@@ -78,7 +91,12 @@ public class EyesFirstProcess extends JavaProcess {
 	}
 
 	public EyesFirstProcess(String wadoURL) {
-		this(wadoURL, null, null, null, null, null);
+		this(wadoURL, null, null, null, null, null, null);
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 
 	/**
@@ -101,6 +119,22 @@ public class EyesFirstProcess extends JavaProcess {
 		if (wadoURL == null)
 			throw new NullPointerException();
 		this.wadoURL = wadoURL;
+		// Set the name to the "bad" version immediately
+		name = "EyesFirst (bad WADO URL)";
+		// Generate the name from the WADO URL. Really this would involve
+		// parsing the WADO URL to be "correct", but, for simplicity's sake:
+		try {
+			URI uri = new URI(wadoURL);
+			String query = uri.getRawQuery();
+			if (query != null) {
+				DicomID id = DicomID.fromQueryString(query);
+				name = "EyesFirst: StudyUID = " + id.getStudyUID() + "; SeriesUID = " + id.getSeriesUID() + "; ObjectUID = " + id.getObjectUID();
+			}
+		} catch (IllegalArgumentException e) {
+			// Ignore (handled above by setting the name to the "bad" value)
+		} catch (URISyntaxException e) {
+			// Ignore (handled above by setting the name to the "bad" value)
+		}
 	}
 
 	public String getCallbackURL() {
@@ -108,14 +142,22 @@ public class EyesFirstProcess extends JavaProcess {
 	}
 
 	/**
-	 * Sets the callback URL, which is used to notify the completetion of
-	 * processing. If {@code null}, no URL is invoked to notify of completetion.
+	 * Sets the callback URL, which is used to notify the completion of
+	 * processing. If {@code null}, no URL is invoked to notify of completion.
 	 * 
 	 * @param callbackURL
 	 *            the callback URL.
 	 */
 	public void setCallbackURL(String callbackURL) {
 		this.callbackURL = callbackURL;
+	}
+
+	public String getCallbackKey() {
+		return callbackKey;
+	}
+
+	public void setCallbackKey(String callbackKey) {
+		this.callbackKey = callbackKey;
 	}
 
 	public String getMcrPath() {
@@ -180,6 +222,10 @@ public class EyesFirstProcess extends JavaProcess {
 			if (callbackURL != null) {
 				arguments.add("-c");
 				arguments.add(callbackURL);
+				if (callbackKey != null) {
+					arguments.add("-k");
+					arguments.add(callbackKey);
+				}
 			}
 		}
 		arguments.add(wadoURL);
@@ -187,7 +233,7 @@ public class EyesFirstProcess extends JavaProcess {
 
 	@Override
 	protected String getClassName() {
-		return "org.mitre.eyesfirst.retinalthickness.App";
+		return "org.mitre.eyesfirst.classifier.App";
 	}
 
 	@Override
@@ -204,12 +250,26 @@ public class EyesFirstProcess extends JavaProcess {
 	@Override
 	protected void runProcess() throws Exception {
 		statusString.set("Starting thickness classifier...");
+		// Change to our process-specific logger
+		log = LoggerFactory.getLogger(getClass().getName() + "." + ProcessManager.uidToString(getUID()));
 		try {
 			super.runProcess();
 			statusString.set("Completed successfully.");
 		} catch (Exception e) {
 			statusString.set(null);
+			log.error("Error running model", e);
 			throw e;
+		} finally {
+			// Clean up.
+			stdout.finish();
+			String line;
+			while ((line = stdout.readLine()) != null) {
+				log.info(line);
+			}
+			stderr.finish();
+			while ((line = stderr.readLine()) != null) {
+				log.warn(line);
+			}
 		}
 	}
 
@@ -256,13 +316,17 @@ public class EyesFirstProcess extends JavaProcess {
 			} else {
 				File runtime = new File(f, "runtime");
 				String[] archs = runtime.list();
-				for (String a : archs) {
-					if (a.length() > 0 && a.charAt(0) != '.') {
-						arch = a;
-						break;
+				if (archs == null) {
+					log.warn("Configured MCR root {} does not contain a \"runtime\" directory.", mcrroot);
+				} else {
+					for (String a : archs) {
+						if (a.length() > 0 && a.charAt(0) != '.') {
+							arch = a;
+							break;
+						}
 					}
+					log.debug("Auto-detected arch as {}", arch);
 				}
-				log.debug("Auto-detected arch as {}", arch);
 			}
 			if (arch == null) {
 				log.warn("Unable to auto-detect platform architecture, defaulting to {}", defaultArch);
@@ -305,10 +369,10 @@ public class EyesFirstProcess extends JavaProcess {
 
 	@Override
 	protected void receiveStdOut(byte[] b, int length) {
-		System.out.write(b, 0, length);
 		stdout.write(b, 0, length);
 		String line;
 		while ((line = stdout.readLine()) != null) {
+			log.info(line);
 			if (line.startsWith("STATUS:")) {
 				// Status message. Rest of line is a JSON object describing
 				// the status.
@@ -332,7 +396,11 @@ public class EyesFirstProcess extends JavaProcess {
 
 	@Override
 	protected void receiveStdErr(byte[] b, int length) {
-		System.err.write(b, 0, length);
+		stderr.write(b, 0, length);
+		String line;
+		while ((line = stderr.readLine()) != null) {
+			log.warn(line);
+		}
 	}
 
 	@Override

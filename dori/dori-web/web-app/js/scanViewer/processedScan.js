@@ -180,7 +180,7 @@ ProcessedFeedbackUI.prototype = {
 						// Coordinates are in order columns, layers, rows
 						// (or fast time, slow time, axial)
 						me._viewer._sliceManager.selectHardExudate(exudate);
-						me._viewer.showSlice('z', exudate.ellipseCenter.z);
+						me._viewer.showSlice(exudate.ellipseCenter.z);
 						return false;
 					}
 				})(this, exudates[i]));

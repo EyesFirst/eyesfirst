@@ -25,6 +25,11 @@ import java.util.List;
  */
 public abstract class JavaProcess extends ExternalProcess {
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2967230470718915558L;
+
+	/**
 	 * Create the classpath to use for the child VM. The default implementation
 	 * simply returns the result from {@link #getClassPath()} to reuse the
 	 * current classpath.

@@ -61,7 +61,7 @@ for ii = 1:Nfiles
                     fileArray{indexSet(ii)}.layers1_smooth2d.name = [curFileBaseName,'_Layers1_smooth2d'];
                     fileArray{indexSet(ii)}.layers1_smooth2d.multiples = 0;
                 end
-                stLayerBdrys = smoothBoundaries(curCompLayerFile,curCompSAAFile,plotFlag,smoothFac,smoothxy,imfig,NsmoothIter);
+                stLayerBdrys = smoothBoundaries2_v2(curCompLayerFile,curCompSAAFile,plotFlag,smoothFac,smoothxy,imfig,NsmoothIter);
                 save(ofile,'stLayerBdrys');
             end;
         end;

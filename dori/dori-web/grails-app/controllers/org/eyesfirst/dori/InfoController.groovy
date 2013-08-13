@@ -30,15 +30,14 @@ class InfoController {
 	}
 
 	def globals = {
+		def currentUser = springSecurityService.getPrincipal()
 		def thisEnv = Environment.current.name
 
 		render(contentType: "text/json") {
+			username = currentUser?.username;
 			internal = iDORI;
 			solrCoreUrl = '';
 			solrCoreRequestHandler = 'solr.groovy';
-			octScanViewerUrl = grails.util.GrailsConfig['eyesfirst.octScanViewerURL'];
-			diagnosisUrl = '/doriweb/diagnosis?rawQueryString=';
-			feedbackUrl = '/doriweb/feedback?processedQueryString=';
 		}
 	}
 }

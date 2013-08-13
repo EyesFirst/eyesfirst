@@ -12,19 +12,24 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-function thickFeatures = calculateThicknessStats(thicknessMapFile,statPar)
+function thickFeatures = calculateThicknessStats(thicknessMapFile,statPar,pixelDim)
 skewnessFlag = statPar.skewnessFlag; % if 1 does not correct for bias; this is the default.  If 0 then corrects for bias
 kurtosisFlag = statPar.kurtosisFlag; % if 1 does not correct for bias; this is the default.  If 0 then corrects for bias
 NanBuf = 20;
 minThick = 25;
-di = 46.875; % microns per pixel slow time 
-dj = 11.7188; % microns per pixel fast time
-% dk = 1.9531; % microns per pixel axial
+di = pixelDim.slowTime; % microns per pixel slow time 
+dj = pixelDim.fastTime; % microns per pixel fast time
+% dk = pixelDim.axial; % microns per pixel axial
 thicknessSF = 1; % dk/5; % thickness scale factor
 load(thicknessMapFile)
 ssp = .01; % spline smoothness parameter
 [aa,bb] = size(intenseMap1);
-x = [1:128];
+
+% modified by Salim
+x=[1:aa];
+% x = [1:128];
+% x = [1:31];
+
 Lx = length(x);
 y = [NanBuf+1:bb-NanBuf];
 Ly = length(y);

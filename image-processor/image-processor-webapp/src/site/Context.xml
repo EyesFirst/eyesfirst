@@ -1,4 +1,19 @@
 <?xml version="1.0"?>
+<!--
+Copyright 2012 The MITRE Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
 
 <!--
 Example Tomcat configuration file for overriding configuration.
@@ -12,7 +27,7 @@ example, using all default names, this would be copied to
 "$CATALINA_BASE/conf/Catalina/localhost/image-processor-webapp.xml".
 
 THIS IS NOT RECOMMENDED, as Tomcat will delete that file if you ever undeploy
-the webapp. Say, to upgrade it with a newer version. I believe that fill will
+the webapp. Say, to upgrade it with a newer version. I believe that file will
 also be overwritten with the contents of the "META-INF/Context.xml" file inside
 the WAR, if any.
 
@@ -55,6 +70,12 @@ Instead, just copy the <Environment> elements.
 	<!-- The location to store temporary files. If left blank, a temporary
 	directory will be created at startup and files will be stored there. -->
 	<Environment name="eyesfirst/output.path" override="false"
+	             type="java.lang.String"
+	             value=""/>
+	<!-- The file to use to configure Log4J. An empty value uses the default.
+	See the example log4j.properties for details.
+	-->
+	<Environment name="eyesfirst/log4j.configuration" override="false"
 	             type="java.lang.String"
 	             value=""/>
 </Context>

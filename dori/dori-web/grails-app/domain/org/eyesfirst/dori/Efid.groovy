@@ -25,7 +25,7 @@ class Efid {
 		//issuer(blank:false, nullable:false)
 	}
 
-	//TODO add indexes to clinician & date Created
+	// TODO add indexes to clinician & date Created
 
 	static belongsTo = [issuer: EfidIssuer]
 

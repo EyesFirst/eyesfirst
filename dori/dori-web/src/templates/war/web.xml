@@ -16,10 +16,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<web-app version="2.4"
-         xmlns="http://java.sun.com/xml/ns/j2ee"
+<web-app version="2.5"
+         metadata-complete="true"
+         xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
     <display-name>/@grails.project.key@</display-name>
 
     <context-param>
@@ -58,15 +60,15 @@ limitations under the License.
     <filter-mapping>
         <filter-name>sitemesh</filter-name>
         <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>ERROR</dispatcher>
     </filter-mapping>
-
-    <listener>
-        <listener-class>org.codehaus.groovy.grails.web.util.Log4jConfigListener</listener-class>
-    </listener>
 
     <listener>
         <listener-class>org.codehaus.groovy.grails.web.context.GrailsContextLoaderListener</listener-class>
     </listener>
+
+    <!-- Groovley servlet (ADDED) -->
     <servlet>
         <servlet-name>Groovy</servlet-name>
         <servlet-class>groovy.servlet.GroovyServlet</servlet-class>
@@ -94,6 +96,11 @@ limitations under the License.
         <servlet-name>gsp</servlet-name>
         <url-pattern>*.gsp</url-pattern>
     </servlet-mapping>
+
+    <session-config>
+        <!-- 30 minutes -->
+        <session-timeout>30</session-timeout>
+    </session-config>
 
     <welcome-file-list>
         <!--

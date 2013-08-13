@@ -15,69 +15,68 @@
  */
 package org.eyesfirst.dori
 
-import static groovyx.net.http.Method.*
 import static groovyx.net.http.ContentType.*
+import static groovyx.net.http.Method.*
+import static javax.servlet.http.HttpServletResponse.*
 import groovyx.net.http.*
 
-import groovyx.net.http.HTTPBuilder
+import javax.imageio.ImageIO
+import javax.imageio.ImageReader
 
-import java.io.IOException
-import java.io.OutputStreamWriter
-
-import static javax.servlet.http.HttpServletResponse.*
-
-import org.dcm4che2.tool.dcmsnd.DcmSnd
+import org.dcm4che2.io.DicomInputStream
+import org.mitre.eyesfirst.common.MimeTypes
+import org.mitre.eyesfirst.dicom.DicomID
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 
-
 class UploadController {
-
 	static Random = new Random();
 
 	def springSecurityService
+	def solrService
+	def dicomUploadService
 
-	def index = { log.info("Serving upload applet") }
+	def index() { log.info("Serving upload applet") }
 
-	def receive = {
+	def receive() {
 		log.info("Receive called");
 
 		if(request instanceof MultipartHttpServletRequest) {
 			MultipartHttpServletRequest mpr = (MultipartHttpServletRequest)request
 			String efidString = mpr.getParameter("efid")
-			String timestampString = mpr.getParameter("timestamp")
+			// FIXME: What was this for?
+			//String timestampString = mpr.getParameter("timestamp")
+			def efid = Efid.findById(efidString)
+			if (efid == null) {
+				response.status = SC_BAD_REQUEST
+				render "No EFID given or EFID does not exist"
+				return
+			}
 
 			for (Map.Entry<String, MultipartFile> item : mpr.fileMap) {
 				File uploadedFile = File.createTempFile("DCM", null);
 				item.value.transferTo(uploadedFile);
 
-				String[] wadoParams = item.key.split("&")
-				Map<String, String> uidMap = new HashMap<String, String>()
-				for(String s : wadoParams) {
-					log.info(s)
-					String[] pair = s.split("=")
-					uidMap.put(pair[0], pair[1])
-				}
-
 				if (sendToPacsServer(uploadedFile)) {
 					log.info("Successful upload to PACS server");
 					log.info(item.key)
+					// Grab the IDs out of the file
+					DicomID dcmId = new DicomID(new DicomInputStream(new FileInputStream(uploadedFile)).readDicomObject())
+					log.info("Received DICOM file " + dcmId.studyUID + ", " + dcmId.seriesUID + ", " + dcmId.objectUID);
 
-					log.info(uidMap.get("objectUID"))
-					def dicomImage = new DicomImage(rawQueryString: item.key, objectUid: uidMap.get("objectUID"))
-					def efid = Efid.findById(efidString)
+					def dicomImage = new DicomImage(rawQueryString: dcmId.toQueryString(), objectUid: dcmId.objectUID)
 					efid.addToImages(dicomImage)
 					efid.save(failOnError: true, flush: true)
 
-					def url = grails.util.GrailsConfig['eyesfirst.imageProcessorUrl']
+					def url = grailsApplication.config.eyesfirst.imageProcessorUrl
 					log.info("Notifying processor via " + url)
-					notifyProcessor(new URL(url), uidMap.get("studyUID"), uidMap.get("seriesUID"), uidMap.get("objectUID"))
+					notifyProcessor(new URL(url), dcmId.studyUID, dcmId.seriesUID, dcmId.objectUID)
 				} else {
 					log.error("PACS upload unsuccessful");
 				}
 				uploadedFile.delete();
 			}
-			updateSolr()
+			solrService.updateSolr()
 			render(contentType: "text/json") { success = true; }
 		} else {
 			response.status = SC_BAD_REQUEST
@@ -85,11 +84,57 @@ class UploadController {
 		}
 	}
 
-	def receiveFundus = {
-		if(request instanceof MultipartHttpServletRequest) {
+	def fundus() {
+		// Does nothing (this is for a UI view)
+	}
+
+	def uploadDCM() {
+		// Also does nothing (upload form)
+	}
+
+	def receiveFundus() {
+		if (request instanceof MultipartHttpServletRequest) {
 			MultipartHttpServletRequest mpr = (MultipartHttpServletRequest)request
 			for (Map.Entry<String, MultipartFile> item : mpr.fileMap) {
-				FundusPhoto photo = new FundusPhoto(imageData: item.value.getBytes(), format: item.value.getContentType()).save()
+				// Fun new discovery: Spring's MultipartFile will merrily return
+				// "multipart/form-data" for the MIME type. Grr.
+				MultipartFile mpFile = item.value
+				String mime = mpFile.contentType
+				byte[] data = item.value.bytes
+				if (mime == null || (!mime.startsWith("image/"))) {
+					// Just ignore this, it's wrong.
+					// Step 1: try and guess the expected mime type from the
+					// file name, if we have that
+					String name = mpFile.originalFilename
+					if (name != null) {
+						mime = MimeTypes.getMimeType(name);
+					}
+					if (mime == null || (!mime.startsWith("image/"))) {
+						log.warn("Failed to find a MIME type for file \"" + name + "\" and no suitable one was provided by the browser, falling back on ImageIO")
+						// Step 2: THAT didn't work, try again using ImageIO
+						mime = null
+						try {
+							Iterator<ImageReader> readers = ImageIO.getImageReaders(ImageIO.createImageInputStream(new ByteArrayInputStream(data)))
+							while (mime == null && readers.hasNext()) {
+								ImageReader reader = readers.next()
+								String[] mimes = reader.originatingProvider.MIMETypes
+								if (mimes != null && mimes.length > 0) {
+									// Just use the first, we have no way of knowing what the "best" is
+									mime = mimes[0]
+									break
+								}
+							}
+							if (mime == null) {
+								log.warn("No ImageIO plugin found that provided a MIME type, using " + MimeTypes.BINARY_MIME_TYPE)
+								mime = MimeTypes.BINARY_MIME_TYPE
+							}
+						} catch (Exception e) {
+							log.warn("Unable to find a MIME type using standard lookups, fell back to ImageIO, which raised an exception", e)
+						}
+					}
+				}
+				log.info("Uploading fundus photo...")
+				FundusPhoto photo = new FundusPhoto(imageData: data, format: mime).save()
 
 				for(String s : item.key.split(",")) {
 					log.info("query string: " + s)
@@ -137,21 +182,45 @@ class UploadController {
 		//System.out.println("Done.");
 	}
 
-	def processed = {
+	def processed() {
 		if(request instanceof MultipartHttpServletRequest) {
 			MultipartHttpServletRequest mpr = (MultipartHttpServletRequest)request
 			DicomImage imageEntry = DicomImage.findByRawQueryString(mpr.getParameter("rawQueryString"))
 
-			FundusPhoto synth = new FundusPhoto(format: "image/png", imageData: mpr.getFile("fundusPhoto").getBytes())
-			synth.save()
+			if (imageEntry == null) {
+				log.warn("Received processed response for non-existant image " + mpr.getParameter("rawQueryString") + "!")
+				response.sendError(SC_NOT_FOUND)
+				return
+			}
 
-			imageEntry.setClassifierDiagnoses(mpr.getParameter("classifierDiagnoses"))
-			imageEntry.setProcessedQueryString(mpr.getParameter("processedQueryString"))
-			imageEntry.setThicknessMap(mpr.getFile("thicknessMap").getBytes())
-			imageEntry.setSynthesizedFundusPhoto(synth)
+			// The processor may call with incomplete results. Only update what
+			// we actually have.
+			MultipartFile fundus = mpr.getFile("fundusPhoto")
+			if (fundus != null) {
+				FundusPhoto synth = new FundusPhoto(format: mpr.contentType, imageData: mpr.getFile("fundusPhoto").bytes)
+				synth.save()
+				imageEntry.synthesizedFundusPhoto = synth
+			}
+
+			MultipartFile bloodVesselFundus = mpr.getFile("bloodVesselFundus")
+			if (bloodVesselFundus != null) {
+				FundusPhoto bvFundus = new FundusPhoto(format: bloodVesselFundus.contentType, imageData: bloodVesselFundus.bytes)
+				bvFundus.save()
+				imageEntry.bloodVesselFundus = bvFundus
+			}
+
+			String v = mpr.getParameter("classifierDiagnoses")
+			if (v != null)
+				imageEntry.classifierDiagnoses = v
+			v = mpr.getParameter("processedQueryString")
+			if (v != null)
+				imageEntry.processedQueryString = v
+			MultipartFile thicknessMap = mpr.getFile("thicknessMap")
+			if (thicknessMap != null)
+				imageEntry.thicknessMap = thicknessMap.bytes
 			imageEntry.save(flush: true)
 
-			updateSolr()
+			solrService.updateSolr()
 		}
 	}
 
@@ -241,61 +310,13 @@ class UploadController {
 		}
 	}
 
-	def boolean sendToPacsServer (File f) {
-
-		def REMOTE_AE = "DCM4CHEE"
-
-		DcmSnd dcmsnd = new DcmSnd("DCMSND");
-		dcmsnd.setCalledAET(REMOTE_AE);
-		dcmsnd.setRemoteHost(grails.util.GrailsConfig['eyesfirst.dcm4cheeHost']);
-		dcmsnd.setRemotePort(grails.util.GrailsConfig['eyesfirst.dcm4cheePort']);
-
-		dcmsnd.addFile(f);
-
-		dcmsnd.setOfferDefaultTransferSyntaxInSeparatePresentationContext(false);
-		dcmsnd.setSendFileRef(false);
-		dcmsnd.setStorageCommitment(false);
-		dcmsnd.setPackPDV(true);
-		dcmsnd.setTcpNoDelay(true);
-
-		dcmsnd.configureTransferCapability();
+	private boolean sendToPacsServer (File f) {
 		try {
-			dcmsnd.start();
+			dicomUploadService.uploadDicomFile(f)
+			return true
 		} catch (Exception e) {
-			System.err.println("ERROR: Failed to start server for receiving");
-			return false;
-		}
-
-		try {
-			long t1 = System.currentTimeMillis();
-			dcmsnd.open();
-			long t2 = System.currentTimeMillis();
-			System.out.println("Connected to " + REMOTE_AE + " in "
-					+ ((t2 - t1) / 1000F)
-					+ "s");
-
-			dcmsnd.send();
-			dcmsnd.close();
-			System.out.println("Released connection to " + REMOTE_AE);
-		} catch (IOException e) {
-			System.err.println("ERROR: Failed to establish association:"
-					+ e.getMessage());
-			return false;
-		} catch (InterruptedException e) {
-			System.err.println("ERROR: Failed to establish association:"
-					+ e.getMessage());
-			return false;
-		} finally {
-			dcmsnd.stop();
-		}
-
-		return true;
-	}
-
-	def String updateSolr() {
-		def http = new HTTPBuilder(grails.util.GrailsConfig['eyesfirst.solrUpdate'])
-		http.request(POST, XML) {
-			response.success = {resp, xml -> return resp.statusLine }
+			log.warn("Failed to upload to PACS", e)
+			return false
 		}
 	}
 }

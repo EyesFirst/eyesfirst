@@ -41,7 +41,8 @@ for ii = 1:Nfiles
                     fileArray{indexSet(ii)}.thicknessStats.name = [curFileBaseName,'_thicknessStats'];
                     fileArray{indexSet(ii)}.thicknessStats.multiples = 0;
                 end
-                thicknessFeatures  =  calculateThicknessStats(curCompThicknessMapFile,statPar);
+                load([fileArray{indexSet(ii)}.mat.dir, filesep, fileArray{indexSet(ii)}.mat.name], 'pixelDim');
+                thicknessFeatures  =  calculateThicknessStats(curCompThicknessMapFile,statPar,pixelDim);
                 save(ofile,'thicknessFeatures');
             end;
         end;

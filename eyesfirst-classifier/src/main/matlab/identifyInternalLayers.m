@@ -12,7 +12,7 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-function intLayerBdrys = identifyInternalLayers(SAAFile,bdryFile,statFile,internalLayerPar)
+function intLayerBdrys = identifyInternalLayers(SAAFile,bdryFile,statFile,internalLayerPar,pixelDim)
 ofile = [];
 stdv2d = internalLayerPar.stdv2d;
 ksf = internalLayerPar.ksf;
@@ -20,7 +20,9 @@ dfmf = internalLayerPar.dfmf;
 Nlayers = internalLayerPar.Nlayers;
 maxRangeCf = 1000;
 %quadFig = figure;
-
+pixelDimCirrus.axial = 1.953;
+pixelDimCirrus.fastTime = 11.7188;
+pixelDimCirrus.slowTime = 46.875;
 load(SAAFile);
 load(bdryFile);
 load(statFile);
@@ -64,7 +66,7 @@ curx = [xstart:xend];
 for ii = 1:Nslices
     fprintf('STATUS:{"message":"Identifying internal layers (%d/%d)..."}\n', ii, Nslices);
     curim = SAA(:,:,ii);
-    [gim,g2im,kim] = gradientImage2d_wrd_kim(curim,stdv2d,dfmf,'dump');
+    [gim,g2im,kim] = gradientImage2d_wrd_kim(curim,stdv2d,dfmf,'dump',pixelDim);
    %  kim=calculateCurvature(curim, stdv2d, dfmf);
     cf = -gim+abs(g2im)+ksf*kim;
     cf = cf(:,curx);
@@ -103,6 +105,7 @@ for ii = 1:Nslices
     maxInterLayerDist = repmat(round((imFloorRelSub-imTopRelSub)/Nlayers),1,Nlayers+1);
     minInterLayerDist = 15*ones(Nx,Nlayers-1);
     minInterLayerDist = [10*ones(Nx,1) minInterLayerDist 25*ones(Nx,1)];
+    minInterLayerDist = floor(minInterLayerDist*(pixelDimCirrus.axial/pixelDim.axial)); % converts pixel constraint in Cirrus pixel units to current pixel size
     for layerNum = 1:Nlayers
        % minInterLayerDist(:,layerNum) = floor(min(minInterLayerDist(:,layerNum),(maxDistNearFovea(ii,curx(1):curx(1)+Nx-1).')*mu(layerNum)));
        minInterLayerDist(:,layerNum) = floor(min(minInterLayerDist(:,layerNum),quadBound));
@@ -123,7 +126,8 @@ for ii = 1:Nslices
     % etch in intermediate layers
     for kk = 1:bb0
         for jj = 1:Nlayers
-            rowvec = rowOffSet{1}(2)+BdryRelIm(kk,jj)+[-2 -1 0 1 2];
+            %rowvec = rowOffSet{1}(2)+BdryRelIm(kk,jj)+[-2 -1 0 1 2];
+            rowvec = rowOffSet{1}(2)+BdryRelIm(kk,jj);%+[-1 0 1];
             Ivalid = find(rowvec >= 1 & rowvec <= aa0);
             if length(Ivalid) > 0
                 oimwla(rowvec(Ivalid),kk+colOffSet{1}(2)) = maxabsim*ones(length(Ivalid),1);
@@ -142,6 +146,7 @@ for ii = 1:Nslices
      figure(internalLayerPar.sliceFig);
      % imagesc(oimwla)
      imagesc(oimwla);colormap(cmap);title(['slice ',int2str(ii),' with boundaries']);
+     print(internalLayerPar.sliceFig, '-dpng', sprintf('/Users/dpotter/EyesFirst/Another OCT/test2/debug_internal_layers/layer_%d.png', ii));
 %hold on 
 end;
 

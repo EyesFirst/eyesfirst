@@ -17,8 +17,10 @@
  // Place your Spring DSL code here
 beans = {
 	secureRandom(java.security.SecureRandom)
-	actualDicomAccessService(org.mitre.eyesfirst.viewer.WADOService, "${application.config.eyesfirst.wadoURL}")
-	dicomAccessService(org.mitre.eyesfirst.viewer.CachingDicomAccessService, actualDicomAccessService) { bean ->
+	actualDicomAccessService(org.mitre.eyesfirst.dicom.image.WADOService, "${application.config.eyesfirst.wadoURL}")
+	dicomAccessService(org.mitre.eyesfirst.dicom.image.CachingDicomAccessService, actualDicomAccessService) { bean ->
 		bean.destroyMethod = 'destroy'
 	}
+	dicomUploadService(org.mitre.eyesfirst.dicom.DcmSendDicomUploadService, "DCM4CHEE@${application.config.eyesfirst.dcm4cheeHost}:${application.config.eyesfirst.dcm4cheePort}")
+	solrService(org.mitre.eyesfirst.solr.SimpleSolrService, "${grailsApplication.config.eyesfirst.solrUpdate}")
 }

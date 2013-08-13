@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+
+<!--
+Copyright 2013 The MITRE Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<project name="Uploader Applet" default="sign">
+	<!-- Load build.properties to override any values we later set to defaults -->
+	<property file="build.properties"/>
+	<property name="keystore.file" value="uploader-applet.jks"/>
+	<property name="keystore.alias" value="uploader-applet"/>
+	<property name="keystore.password" value="changeme"/>
+	<property name="key.password" value="${keystore.password}"/>
+	<property name="doriweb.dir" value="../../dori-web/trunk"/>
+	<property name="target.dir" value="target"/>
+	<property name="project.artifactId" value="uploader-applet"/>
+	<property name="project.version" value="0.0.2-SNAPSHOT"/>
+	<property name="project.build.finalName" value="${project.artifactId}-${project.version}"/>
+	<property name="applet.lib.dir" value="${target.dir}/applet"/>
+	<property name="applet.packed.dir" value="${target.dir}/packed"/>
+	<property name="applet.signed.dir" value="${target.dir}/signed"/>
+
+	<macrodef name="pack200">
+		<attribute name="destdir"/>
+		<element name="src-files" implicit="yes"/>
+		<sequential>
+			<echo>Pack200-compressing...</echo>
+			<apply executable="pack200" dir="${basedir}" failonerror="true" verbose="true">
+				<arg value="--modification-time=latest"/>
+				<arg value="--deflate-hint=true"/>
+				<arg value="--segment-limit=-1"/>
+				<targetfile/>
+				<srcfile/>
+				<src-files/>
+				<chainedmapper>
+					<flattenmapper/>
+					<globmapper from="*" to="${basedir}/@{destdir}/*.pack.gz"/>
+				</chainedmapper>
+			</apply>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="unpack200">
+		<attribute name="destdir"/>
+		<element name="unpack-files" implicit="yes"/>
+		<sequential>
+			<echo message="Unpacking JAR files..."/>
+			<apply executable="unpack200" dir="${basedir}" failonerror="true" verbose="true">
+				<srcfile/>
+				<targetfile/>
+				<unpack-files/>
+				<chainedmapper>
+					<flattenmapper/>
+					<globmapper from="*.pack.gz" to="@{destdir}/*"/>
+				</chainedmapper>
+			</apply>
+		</sequential>
+	</macrodef>
+
+	<target name="compile" description="Invokes Maven to compile the applet. (Note: you can use -Dskip.maven=true to skip this step.)" unless="skip.maven">
+		<!-- There's almost certainly a better way to do this, but it's not
+		     readily available on Google. -->
+		<exec executable="mvn" failonerror="true">
+			<arg value="package"/>
+		</exec>
+	</target>
+
+	<target name="pack" depends="compile" description="Creates Pack200-compressed versions of the applet JAR files">
+		<!-- Pack200 all the JAR files. -->
+		<mkdir dir="${applet.packed.dir}"/>
+		<pack200 destdir="${applet.packed.dir}">
+			<fileset dir="${applet.lib.dir}" includes="*.jar"/>
+		</pack200>
+		<pack200 destdir="${applet.packed.dir}">
+			<fileset dir="${target.dir}" includes="${project.build.finalName}.jar"/>
+		</pack200>
+	</target>
+
+	<target name="unpack" depends="pack">
+		<unpack200 destdir="${applet.packed.dir}">
+			<fileset dir="${applet.packed.dir}" includes="*.pack.gz"/>
+		</unpack200>
+	</target>
+
+	<target name="sign" depends="unpack" description="Signs all JAR files.">
+		<!-- Now that we've packed and unpacked the JAR files, we have a set of
+		     JAR files we can actually sign and then pack again to create
+		     useable results. -->
+		<mkdir dir="${applet.signed.dir}"/>
+		<signjar alias="${keystore.alias}"
+		         storepass="${keystore.password}" keystore="${keystore.file}"
+		         keypass="${key.password}" destdir="${applet.signed.dir}">
+			<path>
+				<fileset dir="${applet.packed.dir}" includes="*.jar"/>
+			</path>
+		</signjar>
+		<!-- Once we've got them signed, we can pack200 compress them, and now
+		unpacking them (should) produce the same verifiable JAR. -->
+		<pack200 destdir="${applet.signed.dir}">
+			<fileset dir="${applet.signed.dir}" includes="*.jar"/>
+		</pack200>
+	</target>
+
+	<target name="deploy" depends="sign" description="Deploys the applet to dori-web, assuming the entire EyesFirst distribution was checked out.">
+		<copy todir="${doriweb.dir}/web-app/upload/applet">
+			<fileset dir="${applet.signed.dir}" includes="*.jar,*.pack.gz"/>
+		</copy>
+	</target>
+
+	<target name="sign-and-verify" depends="sign" description="Signs the files, then verifies that the signed versions are properly signed.">
+		<tempfile property="verify.temp.dir" prefix="verify-signed-" destdir="${target.dir}"/>
+		<mkdir dir="${verify.temp.dir}"/>
+		<unpack200 destdir="${verify.temp.dir}">
+			<fileset dir="${applet.signed.dir}" includes="*.pack.gz"/>
+		</unpack200>
+		<apply executable="jarsigner" dir="${basedir}" failonerror="false" force="true">
+			<arg value="-verify"/>
+			<srcfile/>
+			<fileset dir="${verify.temp.dir}" includes="*.jar"/>
+		</apply>
+		<delete dir="${verify.temp.dir}"/>
+	</target>
+</project>

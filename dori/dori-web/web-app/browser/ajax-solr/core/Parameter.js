@@ -1,4 +1,4 @@
-// $Id: Parameter.js 127 2011-05-31 18:00:03Z dsmiley $
+// $Id: Parameter.js 435 2013-07-10 19:45:18Z dpotter $
 
 /**
  * Represents a Solr parameter.
@@ -98,7 +98,16 @@ AjaxSolr.Parameter = AjaxSolr.Class.extend(
     if (this.value) {
       return this.name + '=' + prefix + this.valueString(this.value);
     }
-    return '';
+    // For dismax request handlers, if the q parameter has local params, the
+    // q parameter must be set to a non-empty value. In case the q parameter
+    // has local params but is empty, use the q.alt parameter, which accepts
+    // wildcards.
+    else if (this.name == 'q' && prefix) {
+      return 'q.alt=' + prefix + encodeURIComponent('*:*');
+    }
+    else {
+      return '';
+    }
   },
 
   /**
@@ -151,3 +160,21 @@ AjaxSolr.Parameter = AjaxSolr.Class.extend(
     return str.indexOf(',') == -1 ? str : str.split(',');
   }
 });
+
+/**
+ * Escapes a value, to be used in, for example, an fq parameter. Surrounds
+ * strings containing spaces or colons in double quotes.
+ *
+ * @public
+ * @param {String|Number} value The value.
+ * @returns {String} The escaped value.
+ */
+AjaxSolr.Parameter.escapeValue = function (value) {
+  // If the field value has a space, colon, quotation mark or forward slash
+  // in it, wrap it in quotes, unless it is a range query or it is already 
+  // wrapped in quotes.
+  if (value.match(/[ :\/"]/) && !value.match(/[\[\{]\S+ TO \S+[\]\}]/) && !value.match(/^["\(].*["\)]$/)) {
+    return '"' + value.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+  }
+  return value;
+}

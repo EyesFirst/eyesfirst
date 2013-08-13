@@ -1,10 +1,25 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2013 The MITRE Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
 
 <web-app xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          version="3.0"> 
-
 	<env-entry>
 		<description>The WADO endpoint URL. The WADO request parameters will be
 		appended to the end of this (including the '?').</description>
@@ -34,7 +49,7 @@
 		If left blank, the MCRROOT environment variable will be used.</description>
 		<env-entry-name>eyesfirst/mcr.path</env-entry-name>
 		<env-entry-type>java.lang.String</env-entry-type>
-		<env-entry-value>/opt/MATLAB/R2011b</env-entry-value>
+		<env-entry-value>/opt/MATLAB/R2012a</env-entry-value>
 	</env-entry>
 	<env-entry>
 		<description>The URL to send the processed DICOM to. If left blank,
@@ -55,6 +70,13 @@
 		temporary directory will be created at startup and files will be stored
 		there.</description>
 		<env-entry-name>eyesfirst/output.path</env-entry-name>
+		<env-entry-type>java.lang.String</env-entry-type>
+		<env-entry-value></env-entry-value>
+	</env-entry>
+	<env-entry>
+		<description>An alternative path to use to configure Log4J. If blank,
+		the default Log4J configuration system is used.</description>
+		<env-entry-name>eyesfirst/log4j.configuration</env-entry-name>
 		<env-entry-type>java.lang.String</env-entry-type>
 		<env-entry-value></env-entry-value>
 	</env-entry>

@@ -57,8 +57,6 @@ grails.mime.types = [html: [
 //EyesFirst custom
 
 eyesfirst.solrURL = 'http://localhost:8080/solr/dicomobjects/ajaxsolr'
-// I'd remove this entirely, but I can't:
-eyesfirst.octScanViewerURL = '/doriweb/oct-scan-viewer'
 eyesfirst.imageProcessorUrl = 'http://localhost:8080/image-processor-webapp/process/start'
 eyesfirst.wadoURL = 'http://localhost:8888/wado'
 eyesfirst.dcm4cheeHost = 'localhost'
@@ -68,19 +66,11 @@ environments {
 	development {
 		eyesfirst.solrURL = 'http://localhost:8983/solr/dicomobjects/ajaxsolr'
 		eyesfirst.solrUpdate = 'http://localhost:8983/solr/dicomobjects/dataimport?command=full-import'
-		eyesfirst.octScanViewerURL = 'http://localhost:8080/doriweb/oct-scan-viewer'
 		eyesfirst.imageProcessorUrl = 'http://localhost:8081/image-processor-webapp/process/start'
 	}
-	demo {
+	production {
 		eyesfirst.solrURL = 'http://localhost:8080/solr/dicomobjects/ajaxsolr'
 		eyesfirst.solrUpdate = 'http://localhost:8080/solr/dicomobjects/dataimport?command=full-import'
-		eyesfirst.octScanViewerURL = 'http://localhost:8080/doriweb/oct-scan-viewer'
-		eyesfirst.imageProcessorUrl = 'http://localhost:8080/image-processor-webapp/process/start'
-	}
-	production {
-		eyesfirst.solrURL = 'http://eyesfirst.mitre.org/solr/dicomobjects/ajaxsolr'
-		eyesfirst.solrUpdate = 'http://eyesfirst.mitre.org/solr/dicomobjects/dataimport?command=full-import'
-		eyesfirst.octScanViewerURL = 'http://eyesfirst.mitre.org/doriweb/oct-scan-viewer'
 		eyesfirst.imageProcessorUrl = 'http://localhost:8080/image-processor-webapp/process/start'
 	}
 
@@ -111,7 +101,6 @@ grails.logging.jul.usebridge = false //DWS: prefer not to for jboss
 grails.spring.bean.packages = []
 
 // set per-environment serverURL stem for creating absolute links
-environments {
 	production { grails.serverURL = "eyesfirst.mitre.org" }
 	demo { grails.serverURL = "http://localhost:8080/${appName}"}
 	development { grails.serverURL = "http://localhost:8080/${appName}" }
@@ -136,7 +125,7 @@ log4j = {
 
 	error 'org.mortbay.log'
 
-	info 'grails.app.controller'
+	info 'grails.app.controllers'
 
 	info 'org.codehaus.groovy.grails.web.servlet'
 
@@ -150,6 +139,10 @@ grails.plugins.springsecurity.userLookup.userDomainClassName = 'org.eyesfirst.do
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'org.eyesfirst.dori.UserRole'
 grails.plugins.springsecurity.authority.className = 'org.eyesfirst.dori.Role'
 grails.plugins.springsecurity.dao.reflectionSaltSourceProperty = 'username'
+// Default roles (browse and create)
+grails.plugins.springsecurity.ui.register.defaultRoleNames = [ 'ROLE_BROWSE', 'ROLE_CREATE' ]
+// This is related to creating new users - it's the default EFID issuer to add to
+eyesfirst.springsecurity.ui.register.defaultEfidIssuer = 'admin'
 
 //http://grails-plugins.github.com/grails-spring-security-core/docs/manual/guide/19%20Session%20Fixation%20Prevention.html
 grails.plugins.springsecurity.useSessionFixationPrevention = true
@@ -200,6 +193,7 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = [
 			'/feeback/**': ['ROLE_BROWSE'],
 
 			'/diagnosis/**': ['ROLE_BROWSE'],
+			'/oct-scan-viewer/**': ['ROLE_BROWSE'],
 
 			'/upload/applet/**': [
 				'IS_AUTHENTICATED_ANONYMOUSLY'

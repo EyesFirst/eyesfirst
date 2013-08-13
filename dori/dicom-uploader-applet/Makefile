@@ -20,15 +20,17 @@
 
 all: copy
 
-ARTIFACT_NAME=dicom-uploader-applet
+ARTIFACT_NAME=dcm-uploader
 ARTIFACT_VERSION=0.0.1-SNAPSHOT
 ARTIFACT_JAR=$(ARTIFACT_NAME)-$(ARTIFACT_VERSION)
+DORI_PATH=../../dori-web/trunk
+DORI_APPLET_PATH=$(DORI_PATH)/web-app/upload/applet/
 STOREPASS=password
 KEYPASS=password
 
 clean:
 	mvn clean
-	rm -f ../dori-web/web-app/upload/applet/*.jar
+	rm -f "$(DORI_APPLET_PATH)/*.jar"
 
 rebuild: clean all
 
@@ -36,7 +38,7 @@ target/applet/$(ARTIFACT_JAR):
 	mvn -Djarsigner.keypass=$(KEYPASS) -Djarsigner.storepass=$(STOREPASS) package
 
 copy: target/applet/$(ARTIFACT_JAR)
-	mkdir -p ../dori-web/web-app/upload/applet
-	cp -v target/applet/*.jar ../dori-web/web-app/upload/applet
+	mkdir -p "$(DORI_APPLET_PATH)"
+	cp -v target/applet/*.jar "$(DORI_APPLET_PATH)"
 
 .PHONY: all copy clean rebuild

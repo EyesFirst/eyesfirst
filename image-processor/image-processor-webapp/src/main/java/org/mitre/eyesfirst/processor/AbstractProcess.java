@@ -15,15 +15,30 @@
  */
 package org.mitre.eyesfirst.processor;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 import javax.swing.event.EventListenerList;
 
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract class that represents a process that can be run.
+ * Abstract class that represents a process that can be run. Processes are
+ * serializeable, meaning that information about them can be serialized. Some
+ * states cannot be serialized - a process in the {@link Status#RUNNING} state
+ * will be serialized as {@link Status#WAITING}. Otherwise, the information
+ * serialized will reflect whether the process is still waiting, completed, or
+ * failed to run. This allows it to be restarted following a server reset.
  * @author dpotter
  */
-public abstract class AbstractProcess {
+public abstract class AbstractProcess implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7183843045111743047L;
+
 	public static enum Status {
 		/**
 		 * The process has not been run yet and is waiting to be started.
@@ -57,8 +72,8 @@ public abstract class AbstractProcess {
 
 	private Status status = Status.WAITING;
 	private Throwable exception = null;
-	private final EventListenerList statusListeners = new EventListenerList();
-	private long uid;
+	private final transient EventListenerList statusListeners = new EventListenerList();
+	private transient long uid;
 
 	/**
 	 * Gets the {@link ProcessManager} assigned UID. This field only has meaning
@@ -278,5 +293,23 @@ public abstract class AbstractProcess {
 	 */
 	public int getTotalWorkUnits() {
 		return 0;
+	}
+
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		synchronized(this) {
+			// Make sure that we're in a consistent state.
+			if (status == Status.RUNNING) {
+				// Save the status as if we were waiting
+				out.writeObject(Status.WAITING);
+			} else {
+				out.writeObject(status);
+			}
+			out.writeObject(exception);
+		}
+	}
+
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		status = (Status) in.readObject();
+		exception = (Exception) in.readObject();
 	}
 }

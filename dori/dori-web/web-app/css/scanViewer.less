@@ -1,0 +1,301 @@
+/*
+ * Master styles.
+ */
+
+.gradient () {
+	background-color: #f0f0f0;
+	color: #000;
+	background: -moz-linear-gradient(top, #f7f9fb 0%, #e0e5e8 100%);
+	/* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f7f9fb), color-stop(100%, #e0e5e8));
+	/* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #f7f9fb 0%, #e0e5e8 100%);
+	/* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #f7f9fb 0%, #e0e5e8 100%);
+	/* Opera11.10+ */
+	background: -ms-linear-gradient(top, #f7f9fb 0%, #e0e5e8 100%);
+	/* IE10+ */
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f9fb', endColorstr='#e0e5e8',GradientType=0 );
+	/* IE6-9 */
+	background: linear-gradient(top, #f7f9fb 0%, #e0e5e8 100%);
+	/* W3C */
+	text-shadow: 0px 1px 1px #ffffff;
+}
+
+.shadow () {
+	-webkit-box-shadow: 0px 2px 8px -2px #999999;
+	-moz-box-shadow: 0px 2px 8px -2px #999999;
+	box-shadow: 0px 2px 8px -2px #999999;
+	border-bottom: 1px solid #aaa;
+}
+
+html {
+	/* From dori-browser */
+	font-family: "Myriad Pro", Calibri, Helvetica, Arial;
+	font-size: 10pt;
+	/* Not from dori-browser, but I'm guessing: */
+	background-color: #FFF;
+	color: #000;
+}
+
+html, body { margin: 0; padding: 0; }
+
+header {
+	.gradient;
+	.shadow;
+	padding: 0 5px;
+	position: relative;
+}
+h1 {
+	.gradient;
+	font-size: 120%;
+	padding: 5px;
+}
+header h1 {
+	background: transparent;
+	margin: 0;
+	font-size: 200%;
+}
+
+h2 { font-size: 110%; }
+
+h3.chart-title { font-size: 90%; text-align: center; margin-bottom: 0; }
+
+h1.title {
+	margin: 0 0 0.5em 0;
+	border-bottom: 2px solid #BAC8D2;
+	font-size: 140%;
+	padding-left: 10px;
+}
+
+.dicom-controls {
+	padding: 0.5em;
+}
+
+.dicom-controls select {
+	float: left;
+	width: 24pt;
+}
+
+.dicom-slice-slider-container {
+	padding: 0 1em 0 32px;
+}
+
+.loading-indicator {
+	margin: auto;
+	padding: 16px;
+	height: 64px;
+	font-size: 32px;
+	line-height: 64px;
+}
+
+.loading-indicator .throbber {
+	background-image: url(../images/large-spinner.gif);
+	background-repeat: no-repeat;
+	background-position: 8px 8px;
+	width: 48px;
+	height: 48px;
+	margin: 8px;
+	background-color: #333;
+	border-radius: 8px;
+	float: left;
+}
+
+.dicom-imagery .loading-indicator .ui-progressbar {
+	/* Reset the font size to something sane */
+	font-size: 11px;
+}
+
+.fake-picture {
+	width: 200px; height: 200px;
+	background-color: #008;
+}
+
+.fundus-column {
+	width: 220px;
+	padding: 10px;
+	margin: 0;
+	float: left;
+}
+
+@processedColumnSize: 240px;
+@unprocessedColumnSize: 300px;
+
+.processed-diagnoses {
+	padding: 10px;
+	margin: 0 0 0 @processedColumnSize;
+}
+.unprocessed-diagnoses {
+	padding: 10px;
+	margin: 0 0 0 @unprocessedColumnSize;
+}
+
+/* Image controls */
+
+.image-slider {
+	height: 20px;
+	margin-top: 8px;
+}
+.image-slider img.icon {
+	width: 16px;
+	height: 16px;
+	float: left;
+}
+
+.image-slider .ui-slider {
+	margin-left: 24px;
+}
+
+.dicom-processed .dicom-imagery-container {
+	margin: 0 0 0 @processedColumnSize;
+}
+
+.dicom-unprocessed .dicom-imagery-container {
+	margin-left: @unprocessedColumnSize + 10;
+}
+
+.dicom-unprocessed .fundus-column {
+	width: @unprocessedColumnSize - 10;
+}
+
+.dicom.fundus-closed .fundus-column {
+	display: none;
+}
+
+.dicom.fundus-closed .dicom-imagery-container,
+.dicom.fundus-closed .processed-diagnoses,
+.dicom.fundus-closed .unprocessed-diagnoses {
+	margin-left: 0;
+}
+
+.fundus-column-disclosure {
+	cursor: default;
+	position: absolute;
+	left: @unprocessedColumnSize - 30;
+	width: 20px;
+	text-align: center;
+	z-index: 100;
+	.gradient;
+	border: solid 2px #CCC;
+	border-radius: 4px;
+}
+
+.dicom-processed .fundus-column-disclosure {
+	left: @processedColumnSize - 30;
+}
+
+.dicom.fundus-closed .fundus-column-disclosure {
+	left: 0px;
+}
+
+.clinician-notes textarea { width: 100%; }
+
+/*
+.machine-abnormal_thickness { float: left; padding-right: 2em; }
+.machine-hard_exudates { float: left; }
+.clinician-review { clear: both; }
+*/
+
+.data-table {
+	border: solid 1px #000;
+	border-collapse: collapse;
+	margin: 1em;
+}
+
+.data-table td, .data-table th {
+	border: solid 1px #000;
+	border-collapse: collapse;
+	padding: 0.5em;
+}
+
+.data-table th {
+	background-color: #4F81BD;
+	color: #FFF;
+}
+
+table td, table th {
+	font-size: 10pt;
+}
+
+/* Results table, used by the annotations view, which technically has nearly
+nothing to do with the scan viewer but uses the same stylesheet anyway. */
+
+.results-table {
+	width: 100%;
+	border: solid 1px #000;
+	border-collapse: collapse;
+}
+
+.results-table td, .results-table th {
+	border: solid 1px #000;
+	border-collapse: collapse;
+	padding: 0.5em;
+}
+
+.results-table th {
+	.gradient;
+}
+
+/* Imagery sizes */
+
+.thickness-map img { width: 200px; height: 200px; }
+
+/* Styles for the fundus slider */
+
+.ui-eyesfirst-slider-handle-x {
+	left: 50%;
+	width: 1px;
+	height: 100%;
+}
+.ui-eyesfirst-slider-handle-y {
+	bottom: 50%;
+	width: 100%;
+	height: 1px;
+}
+.ui-eyesfirst-slider-handle {
+	position: absolute;
+	background-color: #F00;
+}
+.ui-eyesfirst-slider-handle.ui-state-active {
+	/* jQuery UI's ui-state-active adds a 1 pixel border, so compensate: */
+	margin: -1px;
+	background-color: #FF0;
+}
+
+.answer-list {
+	display: table;
+	margin: 0;
+	padding: 0;
+}
+
+.answer-list li {
+	display: table-row;
+}
+
+.answer-list span {
+	display: table-cell;
+	padding-bottom: 0.25em;
+	vertical-align: top;
+}
+
+.answer-list .answer-yes, .answer-list .answer-no, .answer-list .answer-unsure {
+	white-space: pre;
+	padding-left: 1em;
+}
+
+textarea {
+	font-family: "Lucida Grande", Tahoma, sans-serif;
+	font-size: 10pt;
+}
+
+.annotation textarea { width: 100%; height: 100%; }
+
+#dicom .ui-widget .ui-state-error { margin: 1em; }
+
+/* Best attempt at getting nearest-neighbor image rendering */
+.nearest-neighbor {
+	image-rendering: optimizeSpeed;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -o-crisp-edges;
+	image-rendering: -webkit-optimze-contrast;
+}

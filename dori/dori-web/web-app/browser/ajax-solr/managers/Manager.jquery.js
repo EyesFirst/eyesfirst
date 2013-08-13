@@ -1,4 +1,4 @@
-// $Id: Manager.jquery.js 115 2011-05-31 17:59:33Z dsmiley $
+// $Id: Manager.jquery.js 435 2013-07-10 19:45:18Z dpotter $
 
 /**
  * @see http://wiki.apache.org/solr/SolJSON#JSON_specific_parameters
@@ -8,13 +8,17 @@
 AjaxSolr.Manager = AjaxSolr.AbstractManager.extend(
   /** @lends AjaxSolr.Manager.prototype */
   {
-  executeRequest: function (servlet) {
+  executeRequest: function (servlet, string, handler) {
     var self = this;
+    string = string || this.store.string();
+    handler = handler || function (data) {
+      self.handleResponse(data);
+    };
     if (this.proxyUrl) {
-      jQuery.post(this.proxyUrl, { query: this.store.string() }, function (data) { self.handleResponse(data); }, 'json');
+      jQuery.post(this.proxyUrl, { query: string }, handler, 'json');
     }
     else {
-      jQuery.getJSON(this.solrUrl + servlet + '?' + this.store.string() + '&wt=json&json.wrf=?', {}, function (data) { self.handleResponse(data); });
+      jQuery.getJSON(this.solrUrl + servlet + '?' + string + '&wt=json&json.wrf=?', {}, handler);
     }
   }
 });

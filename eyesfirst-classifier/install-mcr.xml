@@ -17,7 +17,7 @@ limitations under the License.
 -->
 
 <project name="MCR Artifact Installer" default="install" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
-	<property name="mcr.version.expected" value="7.16"/>
+	<property name="mcr.version.min" value="7.16"/>
 	<property environment="env"/>
 
 	<include file="find-matlab.xml"/>
@@ -57,23 +57,59 @@ limitations under the License.
 		<artifact:writepom pomRefId="javabuilder.pom" file="${basedir}/javabuilder-pom.xml"/>
 		<artifact:pom id="disk-based.pom" file="${basedir}/javabuilder-pom.xml" />
 		<artifact:install file="${javabuilder.jar}" pomRefId="disk-based.pom"/>
-		<condition property="mcr.version.mismatch">
-			<not><equals arg1="${mcr.version}" arg2="${mcr.version.expected}" forcestring="true"/></not>
-		</condition>
+		<script language="javascript"><![CDATA[
+// Compare versions
+var minver = project.getProperty('mcr.version.min');
+var ver = project.getProperty('mcr.version');
+
+// Split by . and compare each component
+minver = minver.split('.');
+ver = ver.split('.');
+var ok = true;
+for (var i = 0; i < minver.length; i++) {
+    if (minver[i] != ver[i]) {
+        try {
+            var a = Number(ver[i]);
+            var b = Number(minver[i]);
+            if (a < b) {
+                ok = false;
+            } else if (a == b) {
+                // In this case it's something weird like "001" versus "1", so
+                // do a string compare instead
+                if (ver[i] < minver[i]) {
+                    ok = false;
+                }
+            }
+            // In any case, we're done
+            break;
+        } catch (ex) {
+            // number compare failed, so do string compare
+            if (ver[i] < minver[i]) {
+                ok = false;
+            }
+            // Otherwise it's greater, so we break with OK true
+            break;
+        }
+    }
+}
+if (!ok) {
+    project.setProperty('mcr.version.mistmatch', 'true');
+}
+]]></script>
 	</target>
 
 	<target name="-check-version-mistmatch" depends="-install" if="mcr.version.mismatch">
-		<echo level="warning">MCR Version Mistmatch Detected!
+		<echo level="warning">MCR Version Mismatch Detected!
 
-The installed MCR is version ${mcr.version}, but the EyesFirst code was
-written (and tested) against ${mcr.version.expected}. It may work anyway, HOWEVER, you
+The installed MCR is version ${mcr.version}, which is less than the minimum
+tested version ${mcr.version.min}. It may work anyway, HOWEVER, you
 WILL be forced to change the version in the pom.xml file.
 
 Change:
     &lt;dependency&gt;
       &lt;groupId&gt;com.mathworks&lt;/groupId&gt;
       &lt;artifactId&gt;javabuilder&lt;/artifactId&gt;
-      &lt;version&gt;${mcr.version.expected}&lt;/version&gt;
+      &lt;version&gt;[${mcr.version.min},)&lt;/version&gt;
     &lt;/dependency&gt;
 
 To:

@@ -1,4 +1,4 @@
-// $Id: AbstractTextWidget.js 115 2011-05-31 17:59:33Z dsmiley $
+// $Id: AbstractTextWidget.js 435 2013-07-10 19:45:18Z dpotter $
 
 /**
  * Baseclass for all free-text widgets.
@@ -9,6 +9,11 @@
 AjaxSolr.AbstractTextWidget = AjaxSolr.AbstractWidget.extend(
   /** @lends AjaxSolr.AbstractTextWidget.prototype */
   {
+  /**
+   * This widget will by default set the offset parameter to 0 on each request.
+   */
+  start: 0,
+
   /**
    * Sets the main Solr query to the given string.
    *
@@ -66,7 +71,7 @@ AjaxSolr.AbstractTextWidget = AjaxSolr.AbstractWidget.extend(
     var self = this;
     return function () {
       if (self.clear()) {
-        self.manager.doRequest(0);
+        self.doRequest();
       }
       return false;
     }
@@ -82,7 +87,7 @@ AjaxSolr.AbstractTextWidget = AjaxSolr.AbstractWidget.extend(
     var self = this;
     return function () {
       if (self.set(q)) {
-        self.manager.doRequest(0);
+        self.doRequest();
       }
       return false;
     }

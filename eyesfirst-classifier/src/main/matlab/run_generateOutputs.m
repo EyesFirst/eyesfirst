@@ -21,15 +21,15 @@ function [ fileArray ] = run_generateOutputs(fileArray, indexSet, outFileDir)
         fileIn = [ fileArray{ii}.base.dir, filesep, fileArray{ii}.base.name, '.dcm' ];
         fileOut = [ fileArray{ii}.base.dir, filesep, outFileDir, filesep, fileArray{ii}.base.name ];
         layers = [ fileArray{ii}.layers1_smooth2d.dir, filesep, fileArray{ii}.layers1_smooth2d.name, '.mat' ];
-        thickness_maps = [ fileArray{ii}.thicknessMaps.dir, filesep, fileArray{ii}.thicknessMaps.name, '.mat' ];
         load(layers);
-        load(thickness_maps, 'intenseMap2');
-        generate_output_files(fileIn, fileOut, stLayerBdrys, intenseMap2);
-        % Oh well
+        generate_output_files(fileIn, fileOut, stLayerBdrys);
+        matFile = [ fileArray{ii}.mat.dir, filesep, fileArray{ii}.mat.name, '.mat' ];
+        load(matFile, 'pixelDim');
         imageThickMap(fileArray{ii}.thicknessMaps.dir,...
             fileArray{ii}.thicknessStats.name,...
             fileArray{ii}.thicknessMaps.name,...
-            [ fileOut, '_thickness_map.png' ] );
+            [ fileOut, '_thickness_map.png' ],...
+            pixelDim );
         % FIXME: Probably a better way to handle this then within this
         % function, but for now...
         [ score, performancePoint ] = computeDMEscore(fileArray{ii}.thicknessStats.name,...
@@ -39,14 +39,22 @@ function [ fileArray ] = run_generateOutputs(fileArray, indexSet, outFileDir)
         fd = fopen([ fileOut, '_results.json' ], 'w');
         fprintf(fd, '{"abnormalThickness":');
         json(performancePoint, fd);
-        load([fileArray{ii}.cfar.dir, filesep, fileArray{ii}.base.name, '_clusterFeatures.mat']);
+        load([fileArray{ii}.cfarClusterFeatures.dir, filesep, fileArray{ii}.base.name, '_cfar_clusterFeatures.mat']);
         fprintf(fd, ',"hardExudates":{"pfa":%f,"pd":%f,"hardExudates":[', cpfa, cpd);
         numExudates = length(candidateHE);
         for j = 1:numExudates
+            if (j > 1)
+                fprintf(fd, ',');
+            end
             json(candidateHE(j), fd);
         end
         fprintf(fd, ']}}');
         fclose(fd);
+        saaFile = [ fileArray{ii}.SAA.dir, filesep, fileArray{ii}.SAA.name, '.mat' ];
+        layerBdryFile = [ fileArray{ii}.layers1_smooth2d.dir, filesep, fileArray{ii}.layers1_smooth2d.name, '.mat' ];
+        intLayerBdryFile = [ fileArray{ii}.intLayers_smooth2d.dir, filesep, fileArray{ii}.intLayers_smooth2d.name, '.mat' ];
+        mapFile = [ fileArray{ii}.thicknessMaps.dir, filesep, fileArray{ii}.thicknessMaps.name, '.mat' ];
+        createPsuedoFundusImages(saaFile, layerBdryFile, intLayerBdryFile, mapFile, [ fileOut, '_synthesized_fundus' ]);
     end;
 
 end

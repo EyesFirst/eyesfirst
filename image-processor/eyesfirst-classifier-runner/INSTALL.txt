@@ -1,4 +1,4 @@
-This currently uses the DCM4CHE2 2.0.25 toolkit which, at the time of this
+This currently uses the DCM4CHE2 2.0.27 toolkit which, at the time of this
 writing, is not available in any public Maven repository. So you'll have to
 build and install it yourself.
 

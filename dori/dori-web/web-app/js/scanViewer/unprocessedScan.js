@@ -84,6 +84,10 @@ function ClinicianReviewUI(container, cls, title, url, key, dicomURL, diagnoses,
 					me._answers[k].setAnswer(data[k]);
 				}
 			}
+			if ('diagnosis' in data)
+				me._diagnosisField.prop('value', data['diagnosis']);
+			if ('plan' in data)
+				me._planField.prop('value', data['plan']);
 			if (me._notesKey in data)
 				me._notes.prop('value', data[me._notesKey]);
 		},
@@ -104,6 +108,12 @@ ClinicianReviewUI.prototype = {
 		}
 		this._loading.after(ul);
 		var section = $('<div class="clinician-notes"></section>');
+		section.append('<h1>Diagnosis:</h1>');
+		this._diagnosisField = $('<textarea name="diagnosis" rows="5"></textarea>');
+		section.append(this._diagnosisField);
+		section.append('<h1>Plan:</h1>');
+		this._planField = $('<textarea name="plan" rows="5"></textarea>');
+		section.append(this._planField);
 		section.append('<h1>Notes:</h1>');
 		this._notes = $('<textarea name="notes" rows="5"></textarea>');
 		section.append(this._notes);
@@ -112,6 +122,8 @@ ClinicianReviewUI.prototype = {
 		this._container.append(div);
 		this._save = $('<button>Save</button>').button();
 		div.append(this._save);
+		this._saveBanner = $('<div>Saving...</div>').hide();
+		div.append(this._saveBanner);
 		this._save.click((function(me){
 			return function() { me.save(); };
 		})(this));
@@ -126,7 +138,14 @@ ClinicianReviewUI.prototype = {
 			}
 			data[k] = a;
 		}
+		data["diagnosis"] = this._diagnosisField.prop('value');
+		data["plan"] = this._planField.prop('value');
 		data[this._notesKey] = this._notes.prop('value');
+		this._saveBanner.attr('class', 'status-saving');
+		this._saveBanner.text('Saving...');
+		this._saveBanner.show();
+		if (this._saveBannerTimeout)
+			clearTimeout(this._saveBannerTimeout);
 		this.setDisabled(true);
 		var me = this;
 		$.ajax({
@@ -135,10 +154,17 @@ ClinicianReviewUI.prototype = {
 			dataType: 'json',
 			error: function(jqXHR, textStatus, errorThrown) {
 				me.setDisabled(false);
+				me._saveBanner.attr('class', 'status-failed');
+				me._saveBanner.text('Save failed.');
 				alert("Failed to save responses: Server said: " + jqXHR.status + " " + jqXHR.statusText);
 			},
 			success: function(data, textStatus, jqXHR) {
 				me.setDisabled(false);
+				me._saveBanner.attr('class', 'status-saved');
+				me._saveBanner.text('Saved.');
+				me._saveBannerTimeout = setTimeout(function() {
+					me._saveBanner.hide('fade', 500);
+				}, 5000);
 			},
 			//timeout: 60, // timeout
 			type: 'POST'

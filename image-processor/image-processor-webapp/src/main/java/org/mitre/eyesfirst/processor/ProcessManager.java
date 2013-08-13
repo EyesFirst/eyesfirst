@@ -16,8 +16,6 @@
 package org.mitre.eyesfirst.processor;
 
 import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -33,12 +31,13 @@ import org.slf4j.LoggerFactory;
  * @author DPOTTER
  */
 public class ProcessManager {
-	/**
+	// Currently not used.
+	/* *
 	 * Maximum time in milliseconds before pruning a process. (After a process
 	 * has been pruned, it's no longer possible to get updated status reports
 	 * on it.)
-	 */
-	private long maxLiveTime = 30*60*1000;
+	 * /
+	//private long maxLiveTime = 30*60*1000;*/
 
 	private int maxProcesses = 2;
 
@@ -48,17 +47,18 @@ public class ProcessManager {
 	 *
 	 */
 	private static class ProcessEntry {
-		long lastAccess;
+		// Currently not used.
+		//long lastAccess;
 		AbstractProcess process;
 		public ProcessEntry(AbstractProcess process) {
 			this.process = process;
-			lastAccess = System.currentTimeMillis();
+			//lastAccess = System.currentTimeMillis();
 		}
 		/**
 		 * Updates the "sinceLast" time to the current time.
 		 */
 		public void touch() {
-			lastAccess = System.currentTimeMillis();
+			//lastAccess = System.currentTimeMillis();
 		}
 	}
 
@@ -256,22 +256,26 @@ public class ProcessManager {
 		}
 	}
 
-	private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+	// Currently not used
+	//private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	/**
 	 * Remove processes that have not been checked on for too long.
 	 */
 	synchronized void cullDeadProcesses() {
 		// Removes processes that have completed and haven't been checked on
 		// for maxLiveTime milliseconds.
-		long cullBefore = System.currentTimeMillis() - maxLiveTime;
-		int before = processes.size();
+		//long cullBefore = System.currentTimeMillis() - maxLiveTime;
+		//int before = processes.size();
 		Iterator<Map.Entry<Long, ProcessEntry>> iter = processes.entrySet().iterator();
 		int runningCount = 0;
 		while (iter.hasNext()) {
 			Map.Entry<Long, ProcessEntry> entry = iter.next();
 			ProcessEntry pe = entry.getValue();
 			AbstractProcess.Status status = pe.process.getStatus();
-			if (pe.lastAccess < cullBefore && status.isDead()) {
+			// For now, we never remove "dead" processes to ensure the status
+			// is maintained. So instead all this does is check to make sure
+			// that the run count doesn't get messed up.
+			/*if (pe.lastAccess < cullBefore && status.isDead()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Process {} last accessed {}, before cutoff of {}.",
 							new Object[] { uidToString(entry.getKey()),
@@ -280,11 +284,12 @@ public class ProcessManager {
 				}
 				pe.process.destroy();
 				iter.remove();
-			} else if (status == AbstractProcess.Status.RUNNING) {
+			} else */
+			if (status == AbstractProcess.Status.RUNNING) {
 				runningCount++;
 			}
 		}
-		logger.info("Removed {} processes.", before - processes.size());
+		//logger.info("Removed {} processes.", before - processes.size());
 		if (this.runningCount != runningCount) {
 			logger.error("Actual running count {} does not match stored running count of {}! This is a bug!", runningCount, this.runningCount);
 			// Fix this

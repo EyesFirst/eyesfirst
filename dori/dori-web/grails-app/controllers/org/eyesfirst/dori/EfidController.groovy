@@ -77,8 +77,7 @@ class EfidController {
 		render efid.id
 	}
 
-	//TODO not an "action", a utility method
-	String generateNewEfid() {
+	private String generateNewEfid() {
 		int number = Math.abs(secureRandom.nextInt())
 		String checkDigit = CHECKDIGIT.calculate("" + number)//FYI doesn't like negative numbers
 		String efId = String.format('EF%08X', number) + checkDigit

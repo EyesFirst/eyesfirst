@@ -16,21 +16,119 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<project name="matlab">
+<project name="matlab" default="locate-mcr">
+	<macrodef name="is-available">
+		<attribute name="property"/>
+		<attribute name="dir"/>
+		<sequential>
+			<condition property="@{property}" value="@{dir}">
+				<and>
+					<not><isset property="@{property}"/></not>
+					<available file="@{dir}" type="dir"/>
+				</and>
+			</condition>
+		</sequential>
+	</macrodef>
 	<target name="locate-mcr" unless="matlab">
 		<!-- If matlab isn't set, guess a bunch of locations. -->
-		<available property="matlab" value="${env.MATLAB_HOME}" file="${env.MATLAB_HOME}" type="dir"/>
-		<available property="matlab" value="${env.MCRROOT}" file="${env.MCRROOT}" type="dir"/>
-		<available property="matlab" value="/opt/MATLAB/R2011b" file="/opt/MATLAB/R2011b" type="dir"/>
-		<available property="matlab" value="/opt/MATLAB/R2011a" file="/opt/MATLAB/R2011a" type="dir"/>
-		<available property="matlab" value="/Applications/MATLAB_R2011b.app" file="/Applications/MATLAB_R2011b.app" type="dir"/>
-		<available property="matlab" value="/Applications/MATLAB_R2011a.app" file="/Applications/MATLAB_R2011a.app" type="dir"/>
-		<available property="matlab" value="C:\MATLAB\R2011b" file="C:\MATLAB\R2011b" type="dir"/>
-		<available property="matlab" value="C:\MATLAB\R2011a" file="C:\MATLAB\R2011a" type="dir"/>
-		<available property="matlab" value="${env.SystemRoot}\MATLAB\R2011b" file="${env.SystemRoot}\MATLAB\R2011b" type="dir"/>
-		<available property="matlab" value="${env.SystemRoot}\MATLAB\R2011a" file="${env.SystemRoot}\MATLAB\R2011a" type="dir"/>
+		<is-available property="matlab" dir="${env.MATLAB_HOME}"/>
+		<is-available property="matlab" dir="${env.MCRROOT}"/>
+		<condition property="os.windows">
+			<os family="windows"/>
+		</condition>
+		<condition property="os.unix">
+			<os family="unix"/>
+		</condition>
+		<condition property="os.mac">
+			<and>
+				<os family="mac"/>
+				<os family="unix"/>
+			</and>
+		</condition>
+<script language="javascript"><![CDATA[
+var separator = java.io.File.separator;
+var executable_suffix = project.getProperty("os.windows") ? ".exe" : "";
+
+/**
+ * Checks to see if a given directory looks like a MATLAB install. A directory
+ * "looks like a MATLAB install" if it contains bin/matlab.
+ */
+function is_matlab(dir) {
+	return new java.io.File(dir, "bin" + separator + "matlab" + executable_suffix).exists();
+}
+
+if (!project.getProperty('matlab')) {
+	// Attempt to locate MATLAB
+	var roots = [];
+	var from_env = function(env) {
+		var p = java.lang.System.getenv(env);
+		if (p)
+			roots.push(p + "\MATLAB");
+	}
+	if (project.getProperty('os.windows')) {
+		roots.push("C:\MATLAB");
+		from_env("ProgramFiles");
+		from_env("SystemDrive");
+	}
+	if (project.getProperty('os.mac')) {
+		roots.push("/Applications");
+	}
+	if (project.getProperty('os.unix')) {
+		roots.push("/opt", "/usr/local");
+	}
+	// Go through all the roots and see if we can find a MATLAB in them.
+	var possibles = [];
+	for (var i = 0; i < roots.length; i++) {
+		var files = new java.io.File(roots[i]).listFiles();
+		for (var j = 0; j < files.length; j++) {
+			var d = files[j];
+			if (d.isDirectory()) {
+				if (is_matlab(d)) {
+					// Just add directly
+					possibles.push(d);
+				}
+				var n = d.getName();
+				if (n.toUpperCase() == 'MATLAB') {
+					// Add all subdirs (sort of)
+					var subdirs = d.listFiles();
+					for (var k = 0; k < subdirs.length; k++) {
+						if (is_matlab(subdirs[k])) {
+							possibles.push(subdirs[k]);
+						}
+					}
+				}
+			}
+		}
+	}
+	if (possibles.length == 0) {
+		var out = java.lang.System.out;
+		out.println("No MATLAB install located in any of the following locations:");
+		for (var i = 0; i < roots.length; i++) {
+			out.println("    " + roots[i]);
+		}
+	}
+	// Use whichever one was installed last
+	var date = possibles[0].lastModified();
+	var result = possibles[0];
+	for (var i = 1; i < possibles.length; i++) {
+		var lm = possibles[i].lastModified();
+		if (lm > date) {
+			result = possibles[i];
+		}
+	}
+	project.setProperty("matlab", result.getPath());
+}
+]]></script>
 		<fail unless="matlab">Unable to locate MATLAB. Please set the MATLAB property, like:
 
 ant -Dmatlab=/path/to/matlab</fail>
+		<echo level="info">Using MATLAB found in ${matlab}</echo>
+	</target>
+
+	<target name="write-properties" depends="locate-mcr">
+		<!-- Default values: -->
+		<property name="matlab.property.key" value="matlab"/>
+		<property name="matlab.properties" value="matlab.properties"/>
+		<echo file="${matlab.properties}">${matlab.property.key}=${matlab}</echo>
 	</target>
 </project>

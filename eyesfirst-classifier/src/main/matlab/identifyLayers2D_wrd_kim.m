@@ -12,13 +12,13 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-function [BdryRelIm,rowOffSet,colOffSet,oimwla,thicknessProf12,thicknessProf13,intensityProf12,intensityProf13,intensityProf1B] = identifyLayers2D_wrd_kim(curim,imtop,imfloor,Nlayers,mas,maxILdist,minILdist,costFigH,layerFigH,dfstd,ksf)
+function [BdryRelIm,rowOffSet,colOffSet,oimwla,thicknessProf12,thicknessProf13,intensityProf12,intensityProf13,intensityProf1B] = identifyLayers2D_wrd_kim(curim,imtop,imfloor,Nlayers,mas,maxILdist,minILdist,costFigH,layerFigH,dfstd,ksf,pixelDim,layerNumber)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 %dfstd = 2;
 dfmf = 4;
 maxRangeCf = 1000;
-[gim,g2im,kim] = gradientImage2d_wrd_kim(curim,dfstd,dfmf,'dump');
+[gim,g2im,kim] = gradientImage2d_wrd_kim(curim,dfstd,dfmf,'dump',pixelDim);
 cf = -gim+abs(g2im)+ksf*kim;
 figure(costFigH);
 imagesc(cf);
@@ -57,6 +57,7 @@ maxInterLayerDist = repmat(maxILdist,bb,1);
 minInterLayerDist =repmat(minILdist,bb,1);
 % [csRelTop,csRelIm,BdryRelTop,BdryRelIm] = findLayer(encf,imfloorShift,imtopShift,mas,maxRangeCf,'dump');
 [csRelTop,csRelIm,BdryRelTop,BdryRelIm] = findMultiLayer(encf,imfloorShift,imtopShift,mas,maxRangeCf,Nlayers,maxInterLayerDist,minInterLayerDist,[]);
+%[csRelTop,csRelIm,BdryRelTop,BdryRelIm,wcfim] = findMultiLayer_debug(encf,imfloorShift,imtopShift,mas,maxRangeCf,Nlayers,maxInterLayerDist,minInterLayerDist,[]);
 % encfwla = encf;
 % minencf = min(min(encf));
 % [aacf,bbcf]= size(encf);
@@ -76,9 +77,10 @@ oimsla = oimwla;
 [aa0,bb0] = size(oimwla);
 for ii = 1:bb
    for jj = 1:Nlayers
-       rowvec = rowshift+BdryRelIm(ii,jj)+[-3 -2 -1 0 1 2 3];
+       %rowvec = rowshift+BdryRelIm(ii,jj)+[-3 -2 -1 0 1 2 3];
+       rowvec = rowshift+BdryRelIm(ii,jj)+[-1 0 1];
        Ivalid = find(rowvec >= 1 & rowvec <= aa0);
-       if length(Ivalid) > 0
+       if ~isempty(Ivalid)
           oimwla(rowvec(Ivalid),ii+colOffSet{1}(2)) = maxabsim*ones(length(Ivalid),1);
        end;
    end;
@@ -95,6 +97,7 @@ figure(layerFigH);
 cmap = gray;
 cmap(64,:) = [0 0 1];
 imagesc(oimwla);colormap(cmap);title('original image with boundaries');
+print(layerFigH, '-dpng', sprintf('/Users/dpotter/EyesFirst/Another OCT/test2/debug_layers/layer_%d.png', layerNumber));
 % figure(layerFigH);
 % for ii = 1:bbcf
 %    for jj = 1:Nlayers

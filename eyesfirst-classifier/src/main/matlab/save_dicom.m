@@ -101,7 +101,7 @@ try
     fprintf('\b\b\b\bdone.\nPermuting images to the form dicomwrite wants...\n');
     waitbar(0.75, wbh, 'Saving DICOM image - Permuting layers...');
     temp_image = permute(temp_image, [3 4 2 1]);
-    fprintf('Writing file dicom file "%s".\n', file);
+    fprintf('Writing dicom file "%s".\n', file);
 
     waitbar(0.8, wbh, 'Saving DICOM image - Writing image...');
     dicomwrite(temp_image, file, option_defaults, metainfo);

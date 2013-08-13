@@ -41,5 +41,16 @@ class UrlMappings {
 		"/oct-scan-viewer/debug" (controller:"scanViewer", action:"debug")
 		"/oct-scan-viewer/slices/$studyUID/$seriesUID/$objectUID/slices/$sliceType/$sliceNumber"(controller: "scanViewer", action:"slices")
 		"/oct-scan-viewer/slices/$studyUID/$seriesUID/$objectUID/info"(controller: "scanViewer", action:"info")
+		// FIXME: For the most part, these actions should all be done by methods
+		// on a URL for a single annotation. Namely, POST to annotations should
+		// create a new annotation, and there should be a URL for each
+		// annotation used to edit and delete them.
+		"/oct-scan-viewer/slices/$studyUID/$seriesUID/$objectUID/annotations"(controller: "imageAnnotation", action:"index")
+		"/oct-scan-viewer/slices/$studyUID/$seriesUID/$objectUID/annotations/add"(controller: "imageAnnotation", action:"create")
+		"/oct-scan-viewer/slices/$studyUID/$seriesUID/$objectUID/annotations/edit/$annotationID"(controller: "imageAnnotation", action:"update")
+		"/oct-scan-viewer/slices/$studyUID/$seriesUID/$objectUID/annotations/remove/$annotationID"(controller: "imageAnnotation", action:"remove")
+
+		"/browser/export/$efid/$imageID"(controller:"exportDori", action:"export")
+		"/browser/import"(controller:"exportDori", action:"import")
 	}
 }

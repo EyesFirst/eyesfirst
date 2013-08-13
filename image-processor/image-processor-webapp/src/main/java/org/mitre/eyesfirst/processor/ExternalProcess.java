@@ -32,6 +32,15 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class ExternalProcess extends AbstractProcess {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7834756229140388097L;
+	/**
+	 * A unique number used to create a name when the process is running. Note
+	 * that this means that the PID does not need to be reset when an external
+	 * process is deserialized.
+	 */
 	private static AtomicInteger pid = new AtomicInteger(0);
 	private static class StreamReader extends Thread {
 		public static final int BUFFER_SIZE = 1024*8;
@@ -66,6 +75,11 @@ public abstract class ExternalProcess extends AbstractProcess {
 		}
 		public void quit() {
 			alive = false;
+			try {
+				this.join();
+			} catch (InterruptedException e) {
+				// Don't care about this
+			}
 		}
 	}
 
@@ -104,7 +118,7 @@ public abstract class ExternalProcess extends AbstractProcess {
 		List<String> arguments = new ArrayList<String>(32);
 		arguments.add(getCommand());
 		String name = createName(arguments.get(0)) + "-" + pid.addAndGet(1);
-		Logger log = LoggerFactory.getLogger(getClass().getName() + "." + name);
+		Logger log = LoggerFactory.getLogger(getClass().getName() + "." + ProcessManager.uidToString(getUID()));
 		createArguments(arguments);
 		ProcessBuilder pb = new ProcessBuilder(arguments);
 		pb.directory(getWorkingDirectory());
@@ -129,7 +143,7 @@ public abstract class ExternalProcess extends AbstractProcess {
 		StreamReader stdout = new StreamReader(name, p.getInputStream(), false, this);
 		StreamReader stderr = null;
 		if (!pb.redirectErrorStream()) {
-			stderr = new StreamReader(name = "-err", p.getErrorStream(), true, this);
+			stderr = new StreamReader(name + "-err", p.getErrorStream(), true, this);
 		}
 		// Once that's done, nothing to do but wait.
 		result = p.waitFor();
@@ -151,7 +165,8 @@ public abstract class ExternalProcess extends AbstractProcess {
 
 	/**
 	 * Gets the name of the command to run.
-	 * @return
+	 * 
+	 * @return the name of the command to run
 	 */
 	protected abstract String getCommand();
 

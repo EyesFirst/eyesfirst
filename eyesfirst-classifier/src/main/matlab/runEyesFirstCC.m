@@ -12,12 +12,15 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-function runEyesFirstCC(curTask,dicomDirs,subsidiaryDirs,fileArrayFileIn,fileArrayFileOut,internalLayerPar,initialLayerPar,gatingPar,smoothingPar,intLayerSmoothingPar,layerSmoothingPar,thicknessPar,statPar,cfarPar,cfarClusterPar,outFileDirs,indexSet)
+function runEyesFirstCC(curTask,dicomDirs,subsidiaryDirs,fileArrayFileIn,fileArrayFileOut,internalLayerPar,initialLayerPar,gatingPar,smoothingPar,intLayerSmoothingPar,layerSmoothingPar,thicknessPar,statPar,cfarPar,cfarClusterPar,evaluateClusterPar,outFileDirs,indexSet)
+%        runEyesFirstCC(curTask,dicomDirs,subsidiaryDirs,fileArrayFileIn,fileArrayFileOut,internalLayerPar,initialLayerPar,gatingPar,smoothingPar,intLayerSmoothingPar,layerSmoothingPar,thicknessPar,statPar,cfarPar,cfarClusterPar,outFileDirs,indexSet)
 % curTask is what should be done.  For a list of choices see taskList
 % below.  fileArrayFile is the file containing an initial fileArray
 %dicomDirs = {}; % a list of directories containing dicom files to be processed
 %subsidiaryDirs = []; % directories in which to look for files already created in setting up fileArray
-taskList = {'dicom2mat','motionCorrect','initialGating','initialLayerBdrys','initialLayerBoundarySmoothing','generateThicknessMaps','generateStatistics','identifyInternalLayers','smoothInternalLayers','CFARProcess','GenerateExceedanceClusters','CalculateMomentsExceedClust'};
+
+taskList = {'dicom2mat','motionCorrect','initialGating','initialLayerBdrys','initialLayerBoundarySmoothing','generateThicknessMaps','generateStatistics','identifyInternalLayers','smoothInternalLayers','CFARProcess','GenerateExceedanceClusters','evaluateClusters'};
+
 NpossibleTasks = length(taskList);
 analysisTasks = zeros(NpossibleTasks,1);
 % identify Current Task index
@@ -50,7 +53,8 @@ for index=1:length(indexSet)
     currentIndex = indexSet(index);
     try
         fprintf('=== STARTING TO PROCESS %s ===\n', fileArray{currentIndex}.base.name);
-        fileArray = eyesFirstCC(fileArray,currentIndex,outFileDirs,analysisTasks,smoothingPar,gatingPar,initialLayerPar,layerSmoothingPar,thicknessPar,statPar,internalLayerPar,intLayerSmoothingPar,cfarPar,cfarClusterPar);
+        fileArray = eyesFirstCC(fileArray,currentIndex,outFileDirs,analysisTasks,smoothingPar,gatingPar,initialLayerPar,layerSmoothingPar,thicknessPar,statPar,internalLayerPar,intLayerSmoothingPar,cfarPar,cfarClusterPar,evaluateClusterPar);
+     %   fileArray = eyesFirstCC(fileArray,currentIndex,outFileDirs,analysisTasks,smoothingPar,gatingPar,initialLayerPar,layerSmoothingPar,thicknessPar,statPar,internalLayerPar,intLayerSmoothingPar,cfarPar,cfarClusterPar);
         % Don't bother saving the file array any more; as far as I can tell,
         % it's never loaded anyway
         % save(fileArrayFileOut,'fileArray')

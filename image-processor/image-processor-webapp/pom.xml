@@ -23,42 +23,25 @@ limitations under the License.
 
 	<parent>
 		<groupId>org.eyesfirst</groupId>
-		<artifactId>image-processor</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<artifactId>eyesfirst</artifactId>
+		<version>0.0.4-SNAPSHOT</version>
+		<relativePath>../..</relativePath>
 	</parent>
 
 	<artifactId>image-processor-webapp</artifactId>
 	<packaging>war</packaging>
 
 	<name>Image Processor Webapp</name>
+	<description>The web application for starting the EyesFirst image
+	processor.</description>
 	<url>http://maven.apache.org</url>
-
-	<licenses>
-		<license>
-			<name>Apache 2</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-			<comments>A business-friendly OSS license</comments>
-		</license>
-	</licenses>
 
 	<build>
 		<finalName>image-processor-webapp</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<!-- http://maven.apache.org/plugins/maven-compiler-plugin/ -->
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
 				<configuration>
 					<!-- As we are using Servlets 3.0, the web.xml files is no longer needed -->
 					<failOnMissingWebXml>false</failOnMissingWebXml>
@@ -67,7 +50,6 @@ limitations under the License.
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.4</version>
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
@@ -77,15 +59,54 @@ limitations under the License.
 						</goals>
 						<configuration>
 							<excludeGroupIds>javax.servlet</excludeGroupIds>
+							<!--<includeArtifactIds>eyesfirst-classifier</includeArtifactIds>-->
 							<outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/processor-lib</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-dependency-plugin
+										</artifactId>
+										<versionRange>
+											[2.4,)
+										</versionRange>
+										<goals>
+											<goal>
+												copy-dependencies
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+		<main.basedir>${project.parent.parent.basedir}</main.basedir>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -102,7 +123,7 @@ limitations under the License.
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-core-asl</artifactId>
-			<version>1.9.3</version>
+			<version>1.9.8</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -113,18 +134,45 @@ limitations under the License.
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.4</version>
+			<version>1.6.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.4</version>
+			<version>1.6.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eyesfirst</groupId>
 			<artifactId>eyesfirst-classifier-runner</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.4-SNAPSHOT</version>
+			<classifier>${eyesfirst.currentPlatform}</classifier>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eyesfirst</groupId>
+			<artifactId>eyesfirst-common</artifactId>
+			<version>0.0.4-SNAPSHOT</version>
+		</dependency>
+		<!-- Move a bunch of dependencies to the "provided" scope so that
+		copy-dependencies will copy them but they won't be included in
+		WEB-INF/lib, as they're not really needed -->
+		<dependency>
+			<groupId>dcm4che.tool</groupId>
+			<artifactId>dcm4che-tool-dcmsnd</artifactId>
+			<version>2.0.27</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>dcm4che</groupId>
+			<artifactId>dcm4che-image</artifactId>
+			<version>2.0.27</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>dcm4che</groupId>
+			<artifactId>dcm4che-imageio</artifactId>
+			<version>2.0.27</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

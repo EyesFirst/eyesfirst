@@ -57,7 +57,8 @@ for ii = 1:Nfiles
                 fileArray{indexSet(ii)}.intLayers.name = [curFileBaseName,'_intLayers'];
                 fileArray{indexSet(ii)}.intLayers.multiples = 0;
             end
-            intLayerBdrys = identifyInternalLayers(curCompSAAFile,curCompLayerFile,curCompThicknessStatFile,internalLayerPar);
+            load([fileArray{indexSet(ii)}.mat.dir, filesep, fileArray{indexSet(ii)}.mat.name], 'pixelDim');
+            intLayerBdrys = identifyInternalLayers(curCompSAAFile,curCompLayerFile,curCompThicknessStatFile,internalLayerPar,pixelDim);
             save(ofile,'intLayerBdrys');
          end;
     end;

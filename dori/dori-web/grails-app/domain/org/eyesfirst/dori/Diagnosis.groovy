@@ -24,6 +24,8 @@ class Diagnosis {
 	Boolean hardExudates
 	Boolean microaneurysms
 	Boolean neovascularization
+	String diagnosis
+	String plan
 	String notes
 
 	static constraints = {
@@ -31,6 +33,8 @@ class Diagnosis {
 		abnormalRetinalThickness nullable: true
 		microaneurysms nullable: true
 		neovascularization nullable: true
+		diagnosis nullable: true
+		plan nullable: true
 		notes nullable: true
 	}
 }

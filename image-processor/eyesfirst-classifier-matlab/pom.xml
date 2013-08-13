@@ -25,7 +25,7 @@ limitations under the License.
 		<groupId>org.eyesfirst</groupId>
 		<artifactId>eyesfirst</artifactId>
 		<version>0.0.4-SNAPSHOT</version>
-		<relativePath>..</relativePath>
+		<relativePath>../..</relativePath>
 	</parent>
 
 	<artifactId>eyesfirst-classifier-matlab</artifactId>

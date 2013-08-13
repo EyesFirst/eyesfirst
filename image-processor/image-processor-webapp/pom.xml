@@ -143,7 +143,7 @@ limitations under the License.
 		</dependency>
 		<dependency>
 			<groupId>org.eyesfirst</groupId>
-			<artifactId>eyesfirst-classifier-runner</artifactId>
+			<artifactId>eyesfirst-classifier-java</artifactId>
 			<version>0.0.4-SNAPSHOT</version>
 			<classifier>${eyesfirst.currentPlatform}</classifier>
 			<scope>test</scope>

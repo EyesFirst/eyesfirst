@@ -143,9 +143,10 @@ limitations under the License.
 
 	<modules>
 		<module>eyesfirst-common</module>
-		<module>eyesfirst-classifier</module>
-		<module>image-processor/eyesfirst-classifier-runner</module>
+		<module>image-processor/eyesfirst-classifier-matlab</module>
+		<module>image-processor/eyesfirst-classifier-java</module>
 		<module>image-processor/image-processor-webapp</module>
+		<module>dori/dicom-uploader</module>
 	</modules>
 
 	<profiles>

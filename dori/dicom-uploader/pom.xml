@@ -24,6 +24,7 @@ limitations under the License.
 		<groupId>org.eyesfirst</groupId>
 		<artifactId>eyesfirst</artifactId>
 		<version>0.0.4-SNAPSHOT</version>
+		<relativePath>../..</relativePath>
 	</parent>
 
 	<artifactId>uploader</artifactId>
@@ -39,6 +40,6 @@ limitations under the License.
 	</properties>
 	<modules>
 		<module>uploader-core</module>
-		<module>../dicom-uploader-applet</module>
+		<module>uploader-applet</module>
 	</modules>
 </project>

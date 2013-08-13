@@ -29,7 +29,7 @@ limitations under the License.
 	<artifactId>uploader-core</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Uploader Core</name>
+	<name>DICOM Uploader Core</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>

@@ -28,7 +28,7 @@ limitations under the License.
 		<relativePath>../..</relativePath>
 	</parent>
 
-	<artifactId>eyesfirst-classifier-runner</artifactId>
+	<artifactId>eyesfirst-classifier-java</artifactId>
 	<packaging>jar</packaging>
 	<name>EyesFirst Classifier Java</name>
 	<description>The Java portion of the EyesFirst classifier.</description>

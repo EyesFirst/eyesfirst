@@ -23,10 +23,10 @@ limitations under the License.
 	<property name="keystore.alias" value="uploader-applet"/>
 	<property name="keystore.password" value="changeme"/>
 	<property name="key.password" value="${keystore.password}"/>
-	<property name="doriweb.dir" value="../../dori-web/trunk"/>
+	<property name="doriweb.dir" value="../../dori-web"/>
 	<property name="target.dir" value="target"/>
 	<property name="project.artifactId" value="uploader-applet"/>
-	<property name="project.version" value="0.0.2-SNAPSHOT"/>
+	<property name="project.version" value="0.0.4-SNAPSHOT"/>
 	<property name="project.build.finalName" value="${project.artifactId}-${project.version}"/>
 	<property name="applet.lib.dir" value="${target.dir}/applet"/>
 	<property name="applet.packed.dir" value="${target.dir}/packed"/>

@@ -1,0 +1,4 @@
+# Don't include local build.properties
+build.properties
+# Don't include any Java key files in this directory either
+*.jks

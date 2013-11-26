@@ -146,7 +146,6 @@ for ii = 1:Nslices
      figure(internalLayerPar.sliceFig);
      % imagesc(oimwla)
      imagesc(oimwla);colormap(cmap);title(['slice ',int2str(ii),' with boundaries']);
-     print(internalLayerPar.sliceFig, '-dpng', sprintf('/Users/dpotter/EyesFirst/Another OCT/test2/debug_internal_layers/layer_%d.png', ii));
 %hold on 
 end;
 

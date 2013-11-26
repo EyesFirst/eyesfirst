@@ -28,7 +28,7 @@ warning('off', 'MATLAB:MKDIR:DirectoryExists');
 % Data directory to store files:
 % YOU WILL NEED TO CHANGE THIS TO MATCH YOUR MACHINE
 % (FIXME: This really ought to be a parameter)
-eyes_first_data_dir = '/Users/dpotter/EyesFirst/data';%/opt/eyesfirst/data';
+eyes_first_data_dir = '/opt/eyesfirst/data';
 
 % Task to do
 %curTask = 'generateStatistics';

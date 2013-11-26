@@ -117,7 +117,7 @@ limitations under the License.
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.mitre.eyesfirst</groupId>
+			<groupId>org.eyesfirst</groupId>
 			<artifactId>uploader-core</artifactId>
 			<version>0.0.4-SNAPSHOT</version>
 		</dependency>

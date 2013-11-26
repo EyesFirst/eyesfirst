@@ -23,3 +23,18 @@ and handles launching image processing on submitted DICOM images.
 DORI is used to warehouse and search through retinal images, as well as view
 them in an internal viewer. It by default submits images to the image processor
 once they are uploaded, and can view the classifier results.
+
+Build Instructions
+------------------
+
+Before you can build the complete system, there are a few external libraries
+that are required. You will need to build and install the DCM4CHE2 toolkit
+version 2.0.27.
+
+Download DCM4CHE2 from: http://www.dcm4che.org/confluence/display/d2/dcm4che2+DICOM+Toolkit
+
+Use `mvn install` to build and install the DCM4CHE2 libraries.
+
+To build the image processor, you must have MATLAB 2012a or later installed.
+In order to make the MATLAB Java APIs available to the build script, you can
+run a small ANT script to install your local `javabuilder.jar`.

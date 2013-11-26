@@ -10,7 +10,7 @@ These components WILL NOT build without MATLAB.
 
 To install the required Java library, run:
 
-    ant -f retinal-thickness/install-mcr.xml -Dmatlab=/path/to/matlab/R2011b
+    ant -f install-mcr.xml -Dmatlab=/path/to/matlab/R2011b
 
 This will install a local copy of the "javabuilder" JAR which is required to
 compile and run the MATLAB code.

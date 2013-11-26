@@ -97,7 +97,6 @@ figure(layerFigH);
 cmap = gray;
 cmap(64,:) = [0 0 1];
 imagesc(oimwla);colormap(cmap);title('original image with boundaries');
-print(layerFigH, '-dpng', sprintf('/Users/dpotter/EyesFirst/Another OCT/test2/debug_layers/layer_%d.png', layerNumber));
 % figure(layerFigH);
 % for ii = 1:bbcf
 %    for jj = 1:Nlayers

@@ -101,11 +101,11 @@ grails.logging.jul.usebridge = false //DWS: prefer not to for jboss
 grails.spring.bean.packages = []
 
 // set per-environment serverURL stem for creating absolute links
+environments {
 	production { grails.serverURL = "eyesfirst.mitre.org" }
 	demo { grails.serverURL = "http://localhost:8080/${appName}"}
 	development { grails.serverURL = "http://localhost:8080/${appName}" }
 	test { grails.serverURL = "http://localhost:8080/${appName}" }
-
 }
 
 // log4j configuration

@@ -88,7 +88,6 @@ for ii = sliceInd(1):sliceInd(2)
     end;
     %imv_e_d = imdilate(imv_e_d1,sel);
     figure(figMorph);imagesc(imv_e_d);title('image dilation');
-    %print(figMorph, '-dpng', sprintf('/Users/dpotter/EyesFirst/Another OCT/test3/debug_gating/layer_%d.png', ii));
   
     %generate pixel density map for computation of gradient image
     imv_e_d_20_3 = pixelDensityMap(imv_e_d,20,3,'UC',.5);

@@ -1,0 +1,2 @@
+Last Name,First Name,Laterality,Fundus,Visit Date,OCT DICOM File,Thickness Map,Synthesized Fundus Photo,Classifier Results,Retinal Thickness
+Anderson,Barbara,OD,fundus_photo.jpg,2008-03-14T12:34:48,example.dcm,example_thickness_map.png,example_synthesized_fundus_photo.png,216

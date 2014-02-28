@@ -1,0 +1,50 @@
+<!--
+Copyright 2013 The MITRE Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<plugin name='openid-connect' version='0.1.1' grailsVersion='2.2 &gt; *'>
+  <author>Dan Potter</author>
+  <authorEmail>dpotter@mitre.org</authorEmail>
+  <title>OpenID Connect Plugin</title>
+  <description>Provides very basic support for OpenID Connect using Spring Security
+</description>
+  <documentation>http://grails.org/plugin/openid-connect</documentation>
+  <type>OpenidConnectGrailsPlugin</type>
+  <resources>
+    <resource>BootStrap</resource>
+    <resource>openid.connect.LoginController</resource>
+    <resource>org.mitre.openid.OpenIDSecurityService</resource>
+    <resource>openid.connect.OpenidTagLib</resource>
+  </resources>
+  <repositories>
+    <repository name='grailsCentral' url='http://grails.org/plugins' />
+    <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
+  </repositories>
+  <dependencies>
+    <test>
+      <dependency group='org.grails' name='grails-test' version='2.2.3' />
+      <dependency group='org.grails' name='grails-plugin-testing' version='2.2.3' />
+    </test>
+    <compile>
+      <dependency group='org.mitre' name='openid-connect-client' version='1.0.2' />
+    </compile>
+  </dependencies>
+  <plugins>
+    <compile>
+      <plugin group='org.grails.plugins' name='webxml' version='1.4.1' />
+    </compile>
+  </plugins>
+  <runtimePluginRequirements />
+  <behavior />
+</plugin>

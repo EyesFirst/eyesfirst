@@ -1,0 +1,617 @@
+//
+// Copyright 2013 The MITRE Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// Main colors
+@toolbarColor: #404040;
+@toolbarTextColor: #ffffff;
+@listBackground: #fafafa;
+@listBorder: #ebe6de;
+@listHeaderColor: #666666;
+@listHeaderBackground: #f5f5f5;
+@listHeaderBorder: #d0d0c6;
+@listDisabledColor: #a5a5a5;
+@listColor: #7a828c;
+@linkColor: #43a8e0;
+
+// imagery type colors for icons
+@fundusColor:             #eb622c;
+@octColor:                #43a8e0;
+@fluoroColor:             #7fa91b;
+@scanningColor:           #b132c6;
+
+@orange: @fundusColor;
+
+@homeColumnWidth: 84px;
+
+@imageryToolbarHeight: 32px;
+@imagerySidebarWidth: 200px;
+@sliceSelectorHeight: 32px;
+
+@timelineGraphHeight: 99px;
+@timelineDrawerHeight: 75px;
+@timelineHeight: @timelineGraphHeight + @timelineDrawerHeight;
+@timelineArtifactHeight: 50px;
+
+@timelineKeyWidth: 36px;
+
+.toolbar-gradient () {
+	background-color: #404040;
+	background: linear-gradient(to top, #404040, #999999);
+	/* Safari! :shakesfist: */
+	background: -webkit-linear-gradient(top, #999999, #404040);
+}
+
+// Checkboard mixin based on http://lea.verou.me/2011/02/checkerboard-pattern-with-css3/
+// (With changes to work with the finalized CSS3 version)
+
+.checkboard (@color1: #FFF, @color2: #000, @size: 50px) {
+	background-color: @color1;
+	background-image:
+		linear-gradient(45deg, @color2 25%, transparent 25%), 
+		linear-gradient(135deg, @color2 25%, transparent 25%),
+		linear-gradient(45deg, transparent, transparent 75%, @color2 75%, @color2),
+		linear-gradient(135deg, transparent, transparent 75%, @color2 75%, @color2);
+	background-image:
+		-webkit-linear-gradient(45deg, @color2 25%, transparent 25%), 
+		-webkit-linear-gradient(-45deg, @color2 25%, transparent 25%),
+		-webkit-linear-gradient(45deg, transparent 75%, @color2 75%),
+		-webkit-linear-gradient(-45deg, transparent 75%, @color2 75%);
+
+	background-size:@size*2 @size*2;
+	background-position:0 0, @size 0, @size -@size, 0px @size;
+}
+
+html {
+	font-family: "Myriad Pro", Myriad, Geneva, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 10pt;
+	padding: 0;
+	margin: 0;
+	background-color: @toolbarColor;
+	color: @toolbarTextColor;
+}
+
+body {
+	padding: 0;
+	margin: 0;
+}
+
+/* For people who have scripts disabled */
+noscript {
+	display: block;
+	font-size: 200%;
+	margin: 4em;
+	border: solid 1px #808080;
+	padding: 1em;
+}
+
+/* Generic disabled style */
+.disabled { opacity: 0.4; }
+
+#menu-column {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: @homeColumnWidth - 1px;
+	height: 100%;
+	background-color: @toolbarColor;
+	/* There should be a show effect on the right side of the toolbar. This
+	can't really be done with box-shadow because the right hand elements are
+	multiple divs, so instead, do it as a gradient. */
+	background: -webkit-linear-gradient(left, @toolbarColor, @toolbarColor @homeColumnWidth - 6px, mix(@toolbarColor, #000000, 75%));
+	background: linear-gradient(to right, @toolbarColor, @toolbarColor @homeColumnWidth - 6px, mix(@toolbarColor, #000000, 75%));
+	border-right: solid 1px #000;
+	z-index: 100;
+	ul {
+		margin: 0;
+		padding: 100px 0 0 0;
+		li {
+			box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			display: block;
+			padding: 0;
+			width: 60px;
+			height: 60px;
+			a {
+				display: block;
+				width: 40px;
+				height: 32px;
+				/* Safari ignores overflow: hidden or something, so the text
+				still shows up at 100%. Whatever. */
+				text-indent: 200%;
+				white-space: nowrap;
+				overflow: hidden;
+				color: #fafafa;
+				background-image: url(../images/eyesfirst/sidebar-icons.png);
+				background-repeat: no-repeat;
+			}
+			margin: 0px auto;
+			padding: 14px 10px;
+		}
+		li.active {
+			background: #F04927;
+			background: -webkit-radial-gradient(rgba(240, 73, 39, 0.8), rgba(240, 73, 39, 0.0) 75%);
+			background: radial-gradient(rgba(240, 73, 39, 0.8), rgba(240, 73, 39, 0.0) 75%);
+		}
+		li.iconPatientList a { }
+		li.iconCalendarView a { background-position: 0px -58px; }
+		li.iconPhotos a { background-position: 0px -116px; }
+		li.iconArtifactViewer a { background-position: 0px -175px; }
+	}
+}
+
+#content-column {
+	padding-left: @homeColumnWidth;
+}
+
+#patient-list {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	color: @listColor;
+	background-color: @listBackground;
+	margin: 0;
+	padding: 0 0 0 @homeColumnWidth;
+	overflow: auto;
+
+	header {
+		background-color: @listHeaderBackground;
+		margin: 0;
+		padding: 1px;
+	}
+
+	h1 {
+		padding: 0 0 0 8px;
+		border-bottom: solid 1px @listHeaderBorder;
+		font-weight: normal;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+	thead {
+		background-color: @listHeaderBackground;
+		th {
+			font-size: 8pt;
+			padding: 6px 0;
+		}
+	}
+	tbody {
+		overflow: auto;
+		th {
+			width: 4em;
+		}
+		td, th {
+			padding: 8px 0;
+		}
+	}
+	a {
+		color: @linkColor;
+		text-decoration: none;
+	}
+}
+
+#patient-list-alphabet {
+	display: block;
+	margin: 0;
+	padding: 4px 0;
+	border-bottom: solid 1px @listHeaderBorder;
+	font-size: 12pt;
+
+	li {
+		display: inline-block;
+		width: 3.5%;
+		font-weight: bold;
+		padding: 0;
+		margin: 0;
+		text-align: center;
+	}
+	li.disabled {
+		color: @listDisabledColor;
+		font-weight: normal;
+	}
+}
+
+#artifact-viewer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	/* Why the CSS spec didn't make this the default in 1.0, we'll never know. */
+	box-sizing: border-box;
+	/* Along with why Mozilla STILL doesn't support it unprefixed. */
+	-moz-box-sizing: border-box;
+	/* Move content left to fit the home column */
+	padding-left: @homeColumnWidth;
+	/* And move content right to fit the sidebar */
+	padding-right: @imagerySidebarWidth;
+	/* And down to fit the imagery toolbar */
+	padding-top: @imageryToolbarHeight;
+	/* And up to fit the timeline */
+	padding-bottom: @timelineHeight;
+	@backgroundColor: #202020;
+	background-color: @backgroundColor;
+	color: @toolbarTextColor;
+
+	.loading {
+		width: 100%;
+		text-align: center;
+		font-size: 300%;
+		color: mix(@backgroundColor, @toolbarTextColor, 50%);
+		margin: 20% 0;
+	}
+
+	.progressbar {
+		@color: @toolbarTextColor;
+		@height: 32px;
+		@barBorder: 3px;
+		@barPadding: @barBorder;
+		box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		width: 80%;
+		height: @height;
+		border: solid @barBorder @color;
+		border-radius: @height / 2;
+		margin: @height/2 auto;
+		padding: @barPadding;
+
+		.bar {
+			width: 0;
+			height: @height - (@barBorder*2) - (@barPadding*2);
+			border-radius: (@height - (@barBorder*2) - (@barPadding*2)) / 2;
+			background-color: @color;
+		}
+	}
+
+	.imagery-toolbar {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: @imageryToolbarHeight;
+		box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		padding-left: @homeColumnWidth;
+		z-index: 90;
+		.toolbar-gradient;
+		/* Thanks to box-sizing, I don't have to worry about shrinking the
+		height to match the border. */
+		border-bottom: solid 1px #000;
+
+		.icon {
+			display: block;
+			float: left;
+			width: 30px;
+			height: 30px;
+			margin: 1px 8px;
+			text-indent: 100%;
+			white-space: nowrap;
+			overflow: hidden;
+			background-image: url(../images/eyesfirst/toolbar-icons.png);
+			background-repeat: no-repeat;
+		}
+
+		.icon.imagery-single { }
+		.icon.imagery-split-horiz { background-position: -50px 0px; }
+		.icon.imagery-split-vert { background-position: -97px 0px; }
+		.icon.imagery-zoom-in { background-position: -154px 0px; }
+		.icon.imagery-zoom-out { background-position: -212px 0px; }
+		.icon.imagery-box-select { background-position: -279px 0px; }
+		.icon.imagery-ruler { background-position: -350px 0px; width: 36px; }
+		.icon.imagery-play { background-position: -664px 0px; }
+
+		.spacer { display: block; float: left; height: 30px; }
+	}
+
+	.imagery-view {
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		.imagery-container {
+			position: relative;
+			top: 0;
+			right: 0;
+			width: 100%;
+			height: 100%;
+			box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			.annotation-layer {
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				pointer-events: none;
+			}
+		}
+		.imagery-container.oct {
+			padding-bottom: @sliceSelectorHeight;
+		}
+		.oct-slice-selector {
+			position: absolute;
+			width: 100%;
+			height: @sliceSelectorHeight;
+			left: 0;
+			bottom: 0;
+		}
+		.laterality {
+			position: absolute;
+			right: 0;
+			top: 0;
+			width: 54px;
+			height: 48px;
+			font-size: 32px;
+			text-align: center;
+			line-height: 48px;
+			background: rgba(0, 0, 0, 0.5);
+		}
+		.vertical-line {
+			position: absolute;
+			top: 0;
+			height: 100%;
+			width: 1px;
+			background-color: @orange;
+		}
+	}
+
+	.imagery-sidebar {
+		position: absolute;
+		top: 0;
+		right: 0;
+		box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		padding: @imageryToolbarHeight 0 0 0;
+		width: @imagerySidebarWidth;
+		height: 100%;
+		background-color: @toolbarColor;
+		color: @toolbarTextColor;
+		z-index: 80;
+		border-left: solid 1px #000;
+
+		h2 {
+			margin: 0;
+			padding: 0 0 0 4px;
+			font-size: 14px;
+			line-height: 24px;
+			height: 24px;
+			overflow: hidden;
+		}
+
+		.imagery-metadata {
+			padding: 4px;
+			dt {
+				float: left;
+			}
+		}
+
+		.imagery-sidebox {
+			h2 {
+				.toolbar-gradient;
+				height: 24px;
+				border-bottom: solid 1px #000;
+			}
+		}
+		.imagery-thumbnail {
+			@width: @imagerySidebarWidth - 1;
+			/* The sidebar is positioned absolutely, so we can do this: */
+			position: absolute;
+			bottom: @timelineHeight;
+			right: 0;
+			width: 100%;
+			height: @width;
+			.thumbnail {
+				/* Take the thumbnail out of normal flow so that the bounding
+				box can be moved using left/top. */
+				position: absolute;
+				line-height: 0;
+				.bounding-box {
+					position: absolute;
+					border: solid 2px #FFF;
+					box-shadow: 1px 1px #000;
+				}
+				.horizontal-line, .vertical-line {
+					position: absolute;
+					background-color: @orange;
+				}
+				.horizontal-line { width: 100%; height: 1px; }
+				.vertical-line { width: 1px; height: 100%; }
+				img {
+					width: @width;
+					max-height: @width;
+					height: auto;
+				}
+			}
+		}
+		.oct-thickness-map {
+			@width: @imagerySidebarWidth - 1;
+			img {
+				width: @width;
+				max-height: @width;
+				height: auto;
+			}
+		}
+	}
+	.imagery-timeline {
+		/* Place at the bottom of the page */
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		padding: 0 @timelineKeyWidth 0 @homeColumnWidth;
+		box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		width: 100%;
+		height: @timelineHeight;
+		/* This z-index needs to be higher than the home column so that the
+		"tabs" show above it */
+		z-index: 110;
+		.imagery-timeline-graph, .imagery-timeline-graph canvas {
+			width: 100%;
+			height: @timelineGraphHeight - 2;
+		}
+		.imagery-timeline-graph {
+			border-top: solid 1px #000;
+			border-bottom: solid 1px #000;
+		}
+		.imagery-artifact-list {
+			width: 100%;
+			height: @timelineDrawerHeight;
+			.checkboard (#8E8E8E, #868686, 6px);
+			box-shadow: inset 0 0 16px #000;
+			box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			padding: 8px;
+			ul {
+				margin: 0;
+				padding: 0;
+			}
+			li {
+				display: inline-block;
+				position: relative;
+				margin: 0 8px;
+				padding: 0;
+				border: solid 1px #FFF;
+				box-shadow: 3px 3px 6px #000;
+				/* Remove phantom padding around the image that's intended for
+				text */
+				vertical-align: middle;
+				line-height: 0;
+				cursor: pointer;
+				.laterality {
+					position: absolute;
+					right: 0;
+					top: 0;
+					width: 16px;
+					height: 16px;
+					font-size: 10px;
+					line-height: 16px;
+					text-align: center;
+					background-color: rgba(0, 0, 0, 0.5);
+					color: #F0F0F0;
+				}
+			}
+			li.active {
+				box-shadow: 0px 0px 6px 2px #FFF;
+			}
+		}
+		.imagery-timeline-key {
+			position: absolute;
+			width: @timelineKeyWidth;
+			height: @timelineHeight - 1;
+			right: 0;
+			bottom: 0;
+			border-top: solid 1px #000;
+			border-left: solid 1px #000;
+			ul {
+				display: block;
+				margin: 24px 0 0 0;
+				padding: 0;
+			}
+			li {
+				display: block;
+				background-color: #CCC;
+				color: #FFF;
+				border-radius: 8px;
+				height: 16px;
+				line-height: 16px;
+				margin: 10px 2px;
+				font-size: 10px;
+				text-align: center;
+				text-shadow: #000 0px 1px 1px;
+				box-shadow: inset 0px 1px 1px #000, inset 0px -1px 1px rgba(255,255,255,0.5);
+			}
+			li.oct { background-color: @octColor; }
+			li.fundus { background-color: @fundusColor; }
+			li.fluoro { background-color: @fluoroColor; }
+			li.scanning { background-color: @scanningColor; }
+			li.csf { background-color: rgb(153,51,204); }
+			li.hrc { background-color: rgb(204,153,0); }
+		}
+		.imagery-graph-tabs {
+			position: absolute;
+			width: @homeColumnWidth;
+			height: @timelineHeight;
+			left: 0;
+			bottom: 0;
+			z-index: 110;
+			box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			padding: 0 0 0 16px;
+			ul {
+				margin: 0;
+				padding: 0;
+			}
+			li {
+				display: block;
+				font-size: 12px;
+				text-align: right;
+				border: solid 1px #000;
+				border-top: none;
+				&:first-child {
+					border-top: solid 1px #000;
+				}
+				background-color: lighten(@toolbarColor, 10%);
+				padding: 2px;
+			}
+			li.active {
+				background-color: lighten(@toolbarColor, 30%);
+			}
+		}
+	}
+}
+
+// EyesFirst timeline styles
+
+.timeline { cursor: -moz-grab; cursor: -webkit-grab; }
+.timeline.dragging { cursor: -moz-grabbing; cursor: -webkit-grabbing; }
+
+.popup {
+	background-color: #E0E0E0;
+	background: linear-gradient(to top, #BEBEBE, #FFF);
+	background: -webkit-linear-gradient(bottom, #BEBEBE, #FFF);
+	color: #404040;
+	border-radius: 2px;
+	padding: 4px;
+	font-size: 9px;
+	box-shadow: 0px 1px 2px #000;
+	z-index: 200;
+	animation-duration: 500ms;
+	-moz-animation-duration: 500ms;
+	-webkit-animation-duration: 500ms;
+	animation-name: fadein;
+	-moz-animation-name: fadein;
+	-webkit-animation-name: fadein;
+}
+
+.popup.fadeout {
+	opacity: 0;
+	animation-duration: 1s;
+	-moz-animation-duration: 1s;
+	-webkit-animation-duration: 1s;
+	animation-name: fadeout;
+	-moz-animation-name: fadeout;
+	-webkit-animation-name: fadeout;
+}
+
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@-webkit-keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@-moz-keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes fadeout { from { opacity: 1; } to { opacity: 0; } }
+@-webkit-keyframes fadeout { from { opacity: 1; } to { opacity: 0; } }
+@-moz-keyframes fadeout { from { opacity: 1; } to { opacity: 0; } }

@@ -147,6 +147,9 @@ limitations under the License.
 		<module>image-processor/eyesfirst-classifier-java</module>
 		<module>image-processor/image-processor-webapp</module>
 		<module>dori/dicom-uploader</module>
+		<module>clinical-decision-support/openid-connect</module>
+		<module>clinical-decision-support/efid</module>
+		<module>clinical-decision-support/eyesfirst</module>
 	</modules>
 
 	<profiles>

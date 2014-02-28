@@ -1,0 +1,2 @@
+# For the following Grails apps, ignore the plugins directory
+plugins/

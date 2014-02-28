@@ -4,14 +4,16 @@ EyesFirst
 For more information about EyesFirst, please check out our website at
 http://eyesfirst.github.io/ .
 
-EyesFirst is currently split into three separate parts:
+EyesFirst is currently split into four separate parts:
 
  * DORI
+ * The new Clinical Decision Support User Interface
  * The EyesFirst retinal image classifier
  * The EyesFirst image processor
 
-The three parts relate to one another, although conceptually DORI and the
-EyesFirst classifier can be used on their own.
+The four parts relate to one another, although conceptually DORI, the new
+clinical decision support user interface, and the EyesFirst classifier can each
+be used on their own.
 
 The EyesFirst classifier is a MATLAB program that runs through a number of
 statistical analysis to determine various features of a retinal image. It is
@@ -23,6 +25,9 @@ and handles launching image processing on submitted DICOM images.
 DORI is used to warehouse and search through retinal images, as well as view
 them in an internal viewer. It by default submits images to the image processor
 once they are uploaded, and can view the classifier results.
+
+The new clinical support UI is a new UI intended to replace DORI that provides a
+built-in method of viewing the information from the classifier.
 
 Build Instructions
 ------------------

@@ -143,11 +143,12 @@ limitations under the License.
 
 	<modules>
 		<module>eyesfirst-common</module>
+		<!-- Ignore these: they require MATLAB.
 		<module>image-processor/eyesfirst-classifier-matlab</module>
 		<module>image-processor/eyesfirst-classifier-java</module>
 		<module>image-processor/image-processor-webapp</module>
-		<module>dori/dicom-uploader</module>
-		<module>clinical-decision-support/openid-connect</module>
+		<module>dori/dicom-uploader</module>-->
+		<!-- FIXME: This is currently horribly broken <module>clinical-decision-support/openid-connect</module>-->
 		<module>clinical-decision-support/efid</module>
 		<module>clinical-decision-support/eyesfirst</module>
 	</modules>

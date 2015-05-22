@@ -18,12 +18,12 @@ package org.eyesfirst.trial
 import static javax.servlet.http.HttpServletResponse.*
 import grails.converters.JSON
 
-import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.annotation.Secured
 
 class PatientController {
 	def index() { }
 
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def list() {
 		// Generate a list of patients, optionally sorted
 		def page = params.int("p")
@@ -60,7 +60,7 @@ class PatientController {
 		} as JSON
 	}
 
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def info() {
 		def patient = Patient.findById(params["id"]);
 		if (patient == null) {

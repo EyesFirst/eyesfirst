@@ -15,10 +15,10 @@
  */
 package org.eyesfirst.trial
 
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.annotation.Secured
 
 class PatientService {
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def findPatient(String patientId) {
 		if (patientId.isLong()) {
 			return Patient.findById(patientId);
@@ -30,7 +30,7 @@ class PatientService {
 		
 	}
 
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def createPatientArtifactList(Patient patient) {
 		return patient.artifacts.collect {
 			[

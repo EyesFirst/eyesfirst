@@ -23,6 +23,9 @@ import org.eyesfirst.trial.ArtifactType
 import org.eyesfirst.trial.Patient
 import org.eyesfirst.trial.util.MockDicomAccessService
 import org.mitre.eyesfirst.dicom.BasicDicomImage
+import org.eyesfirst.User
+import org.eyesfirst.Role
+import org.eyesfirst.UserRole
 
 class BootStrap {
 	private static final log = LogFactory.getLog(this)
@@ -48,6 +51,14 @@ class BootStrap {
 		if (grailsApplication.config.eyesfirst?.loadSampleData) {
 			createSampleArtifacts(servletContext);
 		}
+		// At present, *always* create sample users, as there won't be any otherwise
+		def adminRole = new Role(authority: 'ROLE_ADMIN').save(flush: true)
+		def clinicianRole = new Role(authority: 'ROLE_CLINICIAN').save(flush: true)
+		def admin = new User(username: 'admin', enabled: true, password: 'password').save(flush: true)
+		UserRole.create admin, adminRole, true
+		UserRole.create admin, clinicianRole, true
+		def clinician = new User(username: 'clinician', enabled: true, password: 'password').save(flush: true)
+		UserRole.create clinician, clinicianRole, true
 	}
 	def destroy = {
 	}

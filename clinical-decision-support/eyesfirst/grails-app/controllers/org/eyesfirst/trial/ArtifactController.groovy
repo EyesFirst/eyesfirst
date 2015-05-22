@@ -19,14 +19,14 @@ import static javax.servlet.http.HttpServletResponse.*
 import grails.converters.JSON
 
 import org.apache.commons.logging.LogFactory
-import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.annotation.Secured
 
 class ArtifactController {
 	private static final log = LogFactory.getLog(this)
 	private static final DEBUG_GO_SLOW = false
 	def index() { }
 
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def list() {
 		def patient = Patient.findById(params["patient"], [fetch:[classifierResults:"eager"]]);
 		if (patient == null) {
@@ -45,7 +45,7 @@ class ArtifactController {
 		} as JSON
 	}
 
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def thumbnail() {
 		def artifact = Artifact.findById(params["id"], [fetch:[thumbnail:"eager"]]);
 		ArtifactThumbnail thumbnail = artifact?.thumbnail;
@@ -59,7 +59,7 @@ class ArtifactController {
 		stream.flush()
 	}
 
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def fetch() {
 		def artifact = Artifact.findById(params["id"], [fetch:[data:"eager"]]);
 		ArtifactData data = artifact?.data;

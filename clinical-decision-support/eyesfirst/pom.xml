@@ -109,13 +109,6 @@ limitations under the License.
 			<type>zip</type>
 		</dependency>
 		<dependency>
-			<groupId>org.mitre</groupId>
-			<artifactId>openid-connect</artifactId>
-			<version>0.1.1</version>
-			<scope>runtime</scope>
-			<type>zip</type>
-		</dependency>
-		<dependency>
 			<groupId>org.grails.plugins</groupId>
 			<artifactId>resources</artifactId>
 			<version>1.1.6</version>

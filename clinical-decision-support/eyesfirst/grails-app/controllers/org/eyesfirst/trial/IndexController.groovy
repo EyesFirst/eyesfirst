@@ -15,17 +15,17 @@
  */
 package org.eyesfirst.trial
 
-//import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.annotation.Secured
 
 class IndexController {
 	def openIDSecurityService
 
-	//@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def index() {
 		// FIXME: At present, manually redirect to the login page if we're not
 		// logged in.
-		if (!openIDSecurityService.loggedIn) {
-			redirect(controller:"login", action:"auth")
-		}
+		//if (!openIDSecurityService.loggedIn) {
+		//	redirect(controller:"login", action:"auth")
+		//}
 	}
 }

@@ -27,7 +27,7 @@ import org.eyesfirst.trial.oct.SynthesizedFundusPhoto
 import org.eyesfirst.trial.oct.ThicknessMap
 import org.mitre.eyesfirst.dicom.DicomImage
 import org.mitre.eyesfirst.dicom.DicomJSONConverter
-import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.annotation.Secured
 
 /**
  * Controller that handles loading slices.
@@ -49,7 +49,7 @@ class OctController {
 	 * slices.
 	 * @return
 	 */
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def info() {
 		DicomImage di = octImageService.loadDicomImage(params["id"])
 		if (di == null) {
@@ -60,7 +60,7 @@ class OctController {
 		DicomJSONConverter.convertToViewerJSON(di.dicomObject, response.writer)
 	}
 
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def classifierResults() {
 		Artifact a = Artifact.findById(params["id"], [fetch:[hardExudates:"eager"]])
 		if (a == null || a.classifierResults == null) {
@@ -108,7 +108,7 @@ class OctController {
 	 * Get a single slice from a scan.
 	 * @return
 	 */
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def slice() {
 		// The data in this case is a string that is the DICOM ID to send to the
 		// WADO service
@@ -150,7 +150,7 @@ class OctController {
 		}
 	}
 
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def thicknessMap() {
 		Artifact a = Artifact.findById(params["id"])
 		if (a == null || a.thicknessMap == null) {
@@ -163,7 +163,7 @@ class OctController {
 		response.outputStream.write(tm.data)
 	}
 
-	@PreAuthorize("hasRole('ROLE_CLINICIAN')")
+	@Secured(['ROLE_CLINICIAN'])
 	def synthesizedFundus() {
 		Artifact a = Artifact.findById(params["id"])
 		if (a == null || a.synthesizedFundusPhoto == null) {

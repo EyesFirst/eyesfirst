@@ -27,7 +27,7 @@ grails.project.dependency.resolution = {
 		// specify dependency exclusions here; for example, uncomment this to disable ehcache:
 		// excludes 'ehcache'
 	}
-	log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+	log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
 	checksums true // Whether to verify checksums on resolve
 
 	repositories {
@@ -36,6 +36,8 @@ grails.project.dependency.resolution = {
 		grailsPlugins()
 		grailsHome()
 		grailsCentral()
+		// Isn't grailsPlugins() supposed to do EXACTLY THIS: ????
+		mavenRepo "http://repo.grails.org/grails/plugins"
 
 		mavenLocal()
 		mavenCentral()
@@ -45,14 +47,15 @@ grails.project.dependency.resolution = {
 		//mavenRepo "http://repository.codehaus.org"
 		//mavenRepo "http://download.java.net/maven/2/"
 		//mavenRepo "http://repository.jboss.com/maven2/"
+		// FIXME: Remove this dependency!
 		// For ImageIO:
-		mavenRepo "http://maven-proxy.mitre.org/artifactory/ext-releases-local"
+		mavenRepo "http://maven.geotoolkit.org/"
 	}
 	dependencies {
 		// specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
 		// runtime 'mysql:mysql-connector-java:5.1.20'
-		compile ('org.mitre.eyesfirst:eyesfirst-common:0.0.4-SNAPSHOT') { changing=true; excludes "slf4j-log4j12" }
+		compile ('org.eyesfirst:eyesfirst-common:0.0.4-SNAPSHOT') { changing=true; excludes "slf4j-log4j12" }
 		runtime 'com.sun.media:jai_imageio:1.1'
 		// This is really only needed for the development build, but whatever
 		// See http://jira.grails.org/browse/GRAILS-9154 for why I don't bother
@@ -65,7 +68,7 @@ grails.project.dependency.resolution = {
 		runtime ":jquery:1.8.3"
 		runtime ":resources:1.1.6"
 		runtime ":jquery-ui:1.8.24"
-		runtime("org.mitre:openid-connect:0.1.1") { changing=true }
+		//runtime("org.mitre:openid-connect:0.1.1") { changing=true }
 		
 		// Uncomment these (or add new ones) to enable additional resources capabilities
 		runtime ":lesscss-resources:1.3.0.3"
@@ -78,5 +81,6 @@ grails.project.dependency.resolution = {
 		runtime ":database-migration:1.1"
 
 		compile ':cache:1.0.1'
+		compile ":spring-security-core:1.2.7.3"
 	}
 }

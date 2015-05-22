@@ -167,3 +167,7 @@ security {
 		]
 	}
 }
+// Added by the Spring Security Core plugin:
+grails.plugins.springsecurity.userLookup.userDomainClassName = 'org.eyesfirst.User'
+grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'org.eyesfirst.UserRole'
+grails.plugins.springsecurity.authority.className = 'org.eyesfirst.Role'
